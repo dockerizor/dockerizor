@@ -3,7 +3,8 @@
 /*
  * This file is part of the Dockerisor package.
  *
- * @license    https://opensource.org/licenses/MIT MIT License
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace App\Model\Context\Build;
@@ -22,8 +23,6 @@ class NodeBuildContext extends AbstractBuildContext implements BuildContextInter
 
     /**
      * Get version.
-     * 
-     * @return string
      */
     public function getVersion(): string
     {
@@ -32,8 +31,6 @@ class NodeBuildContext extends AbstractBuildContext implements BuildContextInter
 
     /**
      * Get image.
-     * 
-     * @return string
      */
     public function getImage(): string
     {
@@ -42,9 +39,7 @@ class NodeBuildContext extends AbstractBuildContext implements BuildContextInter
 
     /**
      * Set image.
-     * 
-     * @param string $image
-     * 
+     *
      * @return self
      */
     public function getCommand(): ?string
@@ -54,9 +49,7 @@ class NodeBuildContext extends AbstractBuildContext implements BuildContextInter
 
     /**
      * Set image.
-     * 
-     * @param string $image
-     * 
+     *
      * @return self
      */
     public function setCommand(string $command): void

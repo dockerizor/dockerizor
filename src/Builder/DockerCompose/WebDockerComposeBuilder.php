@@ -3,7 +3,8 @@
 /*
  * This file is part of the Dockerisor package.
  *
- * @license    https://opensource.org/licenses/MIT MIT License
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace App\Builder\DockerCompose;
@@ -18,14 +19,8 @@ use App\Model\File;
 
 class WebDockerComposeBuilder extends DockerComposeBuilder
 {
-
     /**
-     * Build web service
-     * 
-     * @param AppBuildContext $appBuildContext
-     * @param WebBuildContext $context
-     * 
-     * @return Service
+     * Build web service.
      */
     public function build(AppBuildContext $appBuildContext, WebBuildContext $context): Service
     {
@@ -62,11 +57,6 @@ class WebDockerComposeBuilder extends DockerComposeBuilder
 
     /**
      * Get Nginx template.
-     * 
-     * @param AppBuildContext $appBuildContext
-     * @param WebBuildContext $context
-     * 
-     * @return string
      */
     protected function getNginxTemplate(AppBuildContext $appBuildContext, WebBuildContext $context): string
     {

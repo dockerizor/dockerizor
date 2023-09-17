@@ -3,12 +3,14 @@
 /*
  * This file is part of the Dockerisor package.
  *
- * @license    https://opensource.org/licenses/MIT MIT License
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace App\Dockerizor;
 
 use App\Docker\SocketClient;
+use App\Model\Docker\API\ApiObject;
 use App\Model\Docker\API\Container;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
@@ -34,8 +36,6 @@ class CenterManager extends AbstractManager
 
     /**
      * Get proxy networks.
-     * 
-     * @return array
      */
     public function getNetworks(): array
     {
@@ -65,15 +65,8 @@ class CenterManager extends AbstractManager
         ];
     }
 
-
     /**
      * Find container.
-     * 
-     * @param string $name
-     * @param string $image
-     * @param string $network
-     * 
-     * @return Container|null
      */
     public function findContainer(string $name = null, string $image = null, string $network = null): ?Container
     {
@@ -102,20 +95,16 @@ class CenterManager extends AbstractManager
 
     /**
      * Get container.
-     * 
-     * @param string $id
-     * 
-     * @return array
+     *
+     * @return ObjectApi
      */
-    public function getContainer(string $id): array
+    public function getContainer(string $id): ApiObject
     {
         return $this->dockerClient->getContainer($id);
     }
 
     /**
      * Get containers.
-     * 
-     * @return array
      */
     public function getUsedPorts(): array
     {
@@ -134,8 +123,6 @@ class CenterManager extends AbstractManager
 
     /**
      * Get free port.
-     * 
-     * @return int
      */
     public function getFreePort(): int
     {

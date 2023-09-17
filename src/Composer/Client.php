@@ -3,7 +3,8 @@
 /*
  * This file is part of the Dockerisor package.
  *
- * @license    https://opensource.org/licenses/MIT MIT License
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace App\Composer;
@@ -18,8 +19,6 @@ class Client
 
     /**
      * Set workdir.
-     * 
-     * @param string $workdir
      */
     public function setWorkdir(string $workdir): void
     {
@@ -28,8 +27,6 @@ class Client
 
     /**
      * Get platform requirements.
-     * 
-     * @return array
      */
     public function getPlatformReqs(): array
     {
@@ -40,8 +37,6 @@ class Client
 
     /**
      * Get PHP version requirement.
-     * 
-     * @return string|null
      */
     public function getPhpVersionRequirement(): ?string
     {
@@ -65,8 +60,6 @@ class Client
 
     /**
      * Get PHP extensions requirements.
-     * 
-     * @return array
      */
     public function getExtensionRequirements(): array
     {
@@ -86,8 +79,6 @@ class Client
 
     /**
      * Get PHP extensions suggestions.
-     * 
-     * @return array
      */
     public function getExtensionSuggetions(): array
     {
@@ -112,10 +103,6 @@ class Client
 
     /**
      * Get PHP version.
-     * 
-     * @param string $version
-     * 
-     * @return string
      */
     protected function cleanVersion(string $version): string
     {

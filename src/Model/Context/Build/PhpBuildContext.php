@@ -3,12 +3,11 @@
 /*
  * This file is part of the Dockerisor package.
  *
- * @license    https://opensource.org/licenses/MIT MIT License
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace App\Model\Context\Build;
-
-use App\Model\Dsn;
 
 class PhpBuildContext extends AbstractBuildContext implements BuildContextInterface
 {
@@ -128,8 +127,6 @@ class PhpBuildContext extends AbstractBuildContext implements BuildContextInterf
 
     /**
      * Get version.
-     * 
-     * @return string
      */
     public function getVersion(): string
     {
@@ -138,10 +135,6 @@ class PhpBuildContext extends AbstractBuildContext implements BuildContextInterf
 
     /**
      * Set version.
-     * 
-     * @param string $version
-     * 
-     * @return self
      */
     public function setVersion(string $version): self
     {
@@ -152,8 +145,6 @@ class PhpBuildContext extends AbstractBuildContext implements BuildContextInterf
 
     /**
      * Get minor version.
-     * 
-     * @return string
      */
     public function getMinorVersion(): string
     {
@@ -164,8 +155,6 @@ class PhpBuildContext extends AbstractBuildContext implements BuildContextInterf
 
     /**
      * Get image.
-     * 
-     * @return string
      */
     public function getImage(): string
     {
@@ -174,10 +163,6 @@ class PhpBuildContext extends AbstractBuildContext implements BuildContextInterf
 
     /**
      * Set image.
-     * 
-     * @param string $image
-     * 
-     * @return self
      */
     public function setImage(string $image): self
     {
@@ -188,8 +173,6 @@ class PhpBuildContext extends AbstractBuildContext implements BuildContextInterf
 
     /**
      * Get root dir.
-     * 
-     * @return string
      */
     public function getRootDir(): string
     {
@@ -198,10 +181,6 @@ class PhpBuildContext extends AbstractBuildContext implements BuildContextInterf
 
     /**
      * Set root dir.
-     * 
-     * @param string $rootDir
-     * 
-     * @return self
      */
     public function setRootDir(string $rootDir): self
     {
@@ -212,10 +191,6 @@ class PhpBuildContext extends AbstractBuildContext implements BuildContextInterf
 
     /**
      * Get extensions.
-     * 
-     * @param bool $onlyInstall
-     * 
-     * @return array
      */
     public function getExtensions(bool $onlyInstall = false): array
     {
@@ -238,8 +213,6 @@ class PhpBuildContext extends AbstractBuildContext implements BuildContextInterf
 
     /**
      * Add extensions.
-     * 
-     * @param array $extensions
      *
      * @return self
      */
@@ -252,10 +225,6 @@ class PhpBuildContext extends AbstractBuildContext implements BuildContextInterf
 
     /**
      * Add extension.
-     * 
-     * @param string $extension
-     * 
-     * @return self
      */
     public function addExtension(string $extension): self
     {
@@ -268,10 +237,6 @@ class PhpBuildContext extends AbstractBuildContext implements BuildContextInterf
 
     /**
      * Remove extension.
-     * 
-     * @param string $extension
-     * 
-     * @return self
      */
     public function removeExtension(string $extension): self
     {
@@ -285,11 +250,6 @@ class PhpBuildContext extends AbstractBuildContext implements BuildContextInterf
 
     /**
      * Add configure.
-     * 
-     * @param string $extension
-     * @param string $configure
-     * 
-     * @return self
      */
     public function addConfigure(string $extension, string $configure): self
     {
@@ -300,8 +260,6 @@ class PhpBuildContext extends AbstractBuildContext implements BuildContextInterf
 
     /**
      * Get configures.
-     * 
-     * @return array
      */
     public function getConfigures(): array
     {
@@ -310,10 +268,6 @@ class PhpBuildContext extends AbstractBuildContext implements BuildContextInterf
 
     /**
      * Configure database.
-     * 
-     * @param string $dsn
-     * 
-     * @return void
      */
     public function configureDatabase(string $driver): void
     {

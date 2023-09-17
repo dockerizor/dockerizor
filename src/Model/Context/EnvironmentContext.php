@@ -3,7 +3,8 @@
 /*
  * This file is part of the Dockerisor package.
  *
- * @license    https://opensource.org/licenses/MIT MIT License
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace App\Model\Context;
@@ -25,8 +26,6 @@ class EnvironmentContext
 
     /**
      * Get docker compose file.
-     * 
-     * @return DockerComposeFile
      */
     public function getDockerComposeFile(): DockerComposeFile
     {
@@ -35,8 +34,6 @@ class EnvironmentContext
 
     /**
      * Get workdir.
-     * 
-     * @return string
      */
     public function getWorkdir(): string
     {
@@ -45,8 +42,6 @@ class EnvironmentContext
 
     /**
      * Get app contexts.
-     * 
-     * @return array
      */
     public function getAppContexts(): array
     {
@@ -55,10 +50,6 @@ class EnvironmentContext
 
     /**
      * Set app contexts.
-     * 
-     * @param array $appContexts
-     * 
-     * @return self
      */
     public function addAppContext(AppContextInterface $appContext): self
     {
@@ -69,10 +60,6 @@ class EnvironmentContext
 
     /**
      * Get app context.
-     * 
-     * @param string $class
-     * 
-     * @return AppContextInterface|null
      */
     public function getAppContext(string $class): ?AppContextInterface
     {
@@ -87,10 +74,6 @@ class EnvironmentContext
 
     /**
      * Has app context.
-     * 
-     * @param string $class
-     * 
-     * @return bool
      */
     public function hasAppContext(string $class): bool
     {

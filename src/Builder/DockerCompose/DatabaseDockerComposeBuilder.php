@@ -3,30 +3,30 @@
 /*
  * This file is part of the Dockerisor package.
  *
- * @license    https://opensource.org/licenses/MIT MIT License
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace App\Builder\DockerCompose;
 
-use App\Docker\SocketClient;
-use Cocur\Slugify\Slugify;
-use App\Repository\FileRepository;
-use App\Model\Dsn;
-use App\Model\Docker\ComposeFile\Service\Volume;
-use App\Model\Docker\ComposeFile\Service\Network;
-use App\Model\Docker\ComposeFile\Service;
-use App\Model\Context\Build\DatabaseBuildContext;
+use App\Docker\Client;
 use App\Model\Context\Build\AppBuildContext;
+use App\Model\Context\Build\DatabaseBuildContext;
+use App\Model\Docker\ComposeFile\Service;
+use App\Model\Docker\ComposeFile\Service\Network;
+use App\Model\Docker\ComposeFile\Service\Volume;
+use App\Model\Dsn;
+use App\Repository\FileRepository;
+use Cocur\Slugify\Slugify;
 
 class DatabaseDockerComposeBuilder extends DockerComposeBuilder
 {
-    protected SocketClient $dockerClient;
+    protected Client $dockerClient;
 
     public function __construct(
         FileRepository $fileRepository,
-        SocketClient $dockerClient
-    )
-    {
+        Client $dockerClient
+    ) {
         parent::__construct($fileRepository);
         $this->dockerClient = $dockerClient;
     }
@@ -34,9 +34,6 @@ class DatabaseDockerComposeBuilder extends DockerComposeBuilder
     /**
      * Build the database service.
      *
-     * @param AppBuildContext      $appBuildContext
-     * @param DatabaseBuildContext $databaseContext
-     * 
      * @return Service
      */
     public function build(AppBuildContext $appBuildContext, DatabaseBuildContext $databaseContext)
@@ -69,12 +66,11 @@ class DatabaseDockerComposeBuilder extends DockerComposeBuilder
 
     /**
      * Get the docker image from a DSN.
-     * 
-     * @param string $driver
-     * 
+     *
      * @return string|null
      */
-    public function getImageByDriver(string $driver): string{
+    public function getImageByDriver(string $driver): string
+    {
         switch ($driver) {
             case 'mariadb':
                 return 'mariadb';
@@ -103,10 +99,6 @@ class DatabaseDockerComposeBuilder extends DockerComposeBuilder
 
     /**
      * Get the environnement variables from a DSN.
-     * 
-     * @param Dsn $dsn
-     * 
-     * @return array|null
      */
     public function getEnvironnementByDsn(Dsn $dsn): ?array
     {

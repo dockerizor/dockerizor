@@ -3,7 +3,8 @@
 /*
  * This file is part of the Dockerisor package.
  *
- * @license    https://opensource.org/licenses/MIT MIT License
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace App\Command;
@@ -14,7 +15,6 @@ use App\Configurator\NodeConfigurator;
 use App\Dockerizor\AppManager;
 use App\Model\Context\App\ComposerAppContext;
 use App\Model\Context\App\NodeAppContext;
-use App\Model\Context\App\PhpAppContext;
 use App\Model\Context\ConsoleContext;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;

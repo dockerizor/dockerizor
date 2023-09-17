@@ -3,15 +3,16 @@
 /*
  * This file is part of the Dockerisor package.
  *
- * @license    https://opensource.org/licenses/MIT MIT License
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace App\Model\Context\App;
 
-use App\Model\Enum\Framework;
 use App\Model\Context\Framework\Common;
 use App\Model\Context\Framework\FrameworkInterface;
 use App\Model\Context\Framework\Symfony;
+use App\Model\Enum\Framework;
 
 class ComposerAppContext extends AbstractAppContext implements AppContextInterface
 {
@@ -38,8 +39,6 @@ class ComposerAppContext extends AbstractAppContext implements AppContextInterfa
 
     /**
      * Resolve framework.
-     * 
-     *  @return void
      */
     protected function resolveFramework(): void
     {
@@ -111,8 +110,6 @@ class ComposerAppContext extends AbstractAppContext implements AppContextInterfa
 
     /**
      * Get framework.
-     * 
-     * @return FrameworkInterface|null
      */
     public function getFramework(): ?FrameworkInterface
     {

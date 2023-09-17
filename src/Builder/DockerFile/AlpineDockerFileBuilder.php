@@ -3,7 +3,8 @@
 /*
  * This file is part of the Dockerisor package.
  *
- * @license    https://opensource.org/licenses/MIT MIT License
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace App\Builder\DockerFile;
@@ -14,11 +15,7 @@ use App\Model\Docker\DockerFile;
 class AlpineDockerFileBuilder
 {
     /**
-     * Build Alpine dockerFile
-     * 
-     * @param BuildContextInterface $context
-     * 
-     * @return DockerFile
+     * Build Alpine dockerFile.
      */
     public function build(BuildContextInterface $context): DockerFile
     {

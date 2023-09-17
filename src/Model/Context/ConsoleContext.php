@@ -3,7 +3,8 @@
 /*
  * This file is part of the Dockerisor package.
  *
- * @license    https://opensource.org/licenses/MIT MIT License
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace App\Model\Context;
@@ -49,8 +50,6 @@ class ConsoleContext
 
     /**
      * Get command.
-     * 
-     * @return Command
      */
     public function getCommand(): Command
     {
@@ -59,8 +58,6 @@ class ConsoleContext
 
     /**
      * Get input.
-     * 
-     * @return InputInterface
      */
     public function getInput(): InputInterface
     {
@@ -69,8 +66,6 @@ class ConsoleContext
 
     /**
      * Get output.
-     * 
-     * @return OutputInterface
      */
     public function getOutput(): OutputInterface
     {
@@ -79,7 +74,7 @@ class ConsoleContext
 
     /**
      * Get mode.
-     * 
+     *
      * @return Mode
      */
     public function isModeDryRun(): bool
@@ -89,7 +84,7 @@ class ConsoleContext
 
     /**
      * Get mode.
-     * 
+     *
      * @return Mode
      */
     public function isModeInteractive(): bool
@@ -99,8 +94,6 @@ class ConsoleContext
 
     /**
      * Get questionHelper.
-     * 
-     * @return QuestionHelper
      */
     public function getQuestionHelper(): QuestionHelper
     {

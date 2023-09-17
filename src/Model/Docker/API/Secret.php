@@ -3,60 +3,21 @@
 /*
  * This file is part of the Dockerisor package.
  *
- * @license    https://opensource.org/licenses/MIT MIT License
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace App\Model\Docker\API;
 
-class Secret
+class Secret extends ApiObject
 {
-    protected string $id;
-    protected array $version;
-    protected string $createdAt;
-    protected string $updatedAt;
-    protected array $Spec;
-
-    public function __construct(array $data)
-    {
-        $this->id = $data['ID'];
-        $this->version = $data['Version'];
-        $this->createdAt = $data['CreatedAt'];
-        $this->updatedAt = $data['UpdatedAt'];
-        $this->Spec = $data['Spec'];
-    }
-
-    public function getId(): string
-    {
-        return $this->id;
-    }
-
-    public function getVersion(): array
-    {
-        return $this->version;
-    }
-
-    public function getCreatedAt(): string
-    {
-        return $this->createdAt;
-    }
-
-    public function getUpdatedAt(): string
-    {
-        return $this->updatedAt;
-    }
-
-    public function getSpec(): array
-    {
-        return $this->Spec;
-    }
-
     public function getName(): string
     {
-        return $this->Spec['Name'];
+        return $this->data['spec']['Name'];
     }
 
     public function getLabels(): array
     {
-        return $this->Spec['Labels'];
+        return $this->data['spec']['Labels'];
     }
 }

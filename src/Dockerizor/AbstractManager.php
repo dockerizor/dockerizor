@@ -3,7 +3,8 @@
 /*
  * This file is part of the Dockerisor package.
  *
- * @license    https://opensource.org/licenses/MIT MIT License
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace App\Dockerizor;
@@ -32,8 +33,6 @@ abstract class AbstractManager
 
     /**
      * Check if running in phar.
-     * 
-     * @return bool
      */
     public function isPhar(): bool
     {
@@ -42,8 +41,6 @@ abstract class AbstractManager
 
     /**
      * Get workdir.
-     * 
-     * @return string
      */
     public function getWorkdir(): string
     {
@@ -71,8 +68,6 @@ abstract class AbstractManager
 
     /**
      * Get mode.
-     * 
-     * @return Mode
      */
     public function getMode(): Mode
     {
@@ -89,8 +84,6 @@ abstract class AbstractManager
 
     /**
      * Load config.
-     * 
-     * @return array
      */
     public function loadConfig(): array
     {
@@ -107,8 +100,6 @@ abstract class AbstractManager
 
     /**
      * Save config.
-     * 
-     * @return void
      */
     public function saveConfig(): void
     {
@@ -119,10 +110,6 @@ abstract class AbstractManager
 
     /**
      * Get config.
-     * 
-     * @param string $path
-     * 
-     * @return mixed
      */
     public function getConfig(string $path): mixed
     {
@@ -131,11 +118,6 @@ abstract class AbstractManager
 
     /**
      * Set config.
-     * 
-     * @param string $path
-     * @param mixed $value
-     * 
-     * @return self
      */
     public function setConfig(string $path, mixed $value): self
     {
@@ -146,8 +128,6 @@ abstract class AbstractManager
 
     /**
      * Generate password.
-     * 
-     * @return string
      */
     public function generatePassword(): string
     {

@@ -3,7 +3,8 @@
 /*
  * This file is part of the Dockerisor package.
  *
- * @license    https://opensource.org/licenses/MIT MIT License
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace App\Model\Context\Build;
@@ -35,8 +36,6 @@ class AppBuildContext
 
     /**
      * Get app name.
-     * 
-     * @return string
      */
     public function getAppName(): string
     {
@@ -45,10 +44,6 @@ class AppBuildContext
 
     /**
      * Set app name.
-     * 
-     * @param string $appName
-     * 
-     * @return self
      */
     public function setAppName(string $appName): self
     {
@@ -59,8 +54,6 @@ class AppBuildContext
 
     /**
      * Get workdir.
-     * 
-     * @return string
      */
     public function getWorkdir(): string
     {
@@ -69,10 +62,6 @@ class AppBuildContext
 
     /**
      * Set workdir.
-     * 
-     * @param string $workdir
-     * 
-     * @return self
      */
     public function setWorkdir(string $workdir): self
     {
@@ -83,8 +72,6 @@ class AppBuildContext
 
     /**
      * Get domain.
-     * 
-     * @return string
      */
     public function getDomain(): string
     {
@@ -93,10 +80,6 @@ class AppBuildContext
 
     /**
      * Set domain.
-     * 
-     * @param string $domain
-     * 
-     * @return self
      */
     public function setDomain(string $domain): self
     {
@@ -107,8 +90,6 @@ class AppBuildContext
 
     /**
      * Get docker compose file.
-     * 
-     * @return DockerComposeFile
      */
     public function getDockerComposeFile(): DockerComposeFile
     {
@@ -117,10 +98,6 @@ class AppBuildContext
 
     /**
      * Set docker compose file.
-     * 
-     * @param DockerComposeFile $dockerComposeFile
-     * 
-     * @return self
      */
     public function setDockerComposeFile(DockerComposeFile $dockerComposeFile): self
     {
@@ -131,8 +108,6 @@ class AppBuildContext
 
     /**
      * Get proxy container.
-     * 
-     * @return Container
      */
     public function getProxyContainer(): Container
     {
@@ -141,10 +116,6 @@ class AppBuildContext
 
     /**
      * Set proxy container.
-     * 
-     * @param Container $proxyContainer
-     * 
-     * @return self
      */
     public function setProxyContainer(Container $proxyContainer): self
     {
@@ -155,10 +126,6 @@ class AppBuildContext
 
     /**
      * Set frontend network.
-     * 
-     * @param string $frontendNetwork
-     * 
-     * @return self
      */
     public function setFrontendNetwork(string $frontendNetwork): self
     {
@@ -174,8 +141,6 @@ class AppBuildContext
 
     /**
      * Get frontend network.
-     * 
-     * @return string
      */
     public function getFrontendNetwork(): string
     {
@@ -184,10 +149,6 @@ class AppBuildContext
 
     /**
      * Set backend network.
-     * 
-     * @param string $backendNetwork
-     * 
-     * @return self
      */
     public function setBackendNetwork(string $backendNetwork): self
     {
@@ -203,8 +164,6 @@ class AppBuildContext
 
     /**
      * Get backend network.
-     * 
-     * @return string
      */
     public function getBackendNetwork(): string
     {
@@ -213,10 +172,6 @@ class AppBuildContext
 
     /**
      * Add build context.
-     * 
-     * @param BuildContextInterface $context
-     * 
-     * @return self
      */
     public function addBuildContext(BuildContextInterface $context): self
     {
@@ -227,8 +182,6 @@ class AppBuildContext
 
     /**
      * Get build contexts.
-     * 
-     * @return array
      */
     public function getBuildContexts(): array
     {
@@ -237,10 +190,6 @@ class AppBuildContext
 
     /**
      * Get build context.
-     * 
-     * @param string $class
-     * 
-     * @return BuildContextInterface|null
      */
     public function getBuildContext(string $class): ?BuildContextInterface
     {
@@ -255,8 +204,6 @@ class AppBuildContext
 
     /**
      * Get files.
-     * 
-     * @return array
      */
     public function getFiles(): array
     {
@@ -265,10 +212,6 @@ class AppBuildContext
 
     /**
      * Add file.
-     * 
-     * @param FileInterface $file
-     * 
-     * @return self
      */
     public function addFile(FileInterface $file): self
     {
@@ -279,8 +222,6 @@ class AppBuildContext
 
     /**
      * Get runs.
-     * 
-     * @return array
      */
     public function getRuns(): array
     {
@@ -289,10 +230,6 @@ class AppBuildContext
 
     /**
      * Add run.
-     * 
-     * @param DockerRun $run
-     * 
-     * @return self
      */
     public function addRun(DockerRun $run): self
     {

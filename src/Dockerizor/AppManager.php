@@ -3,7 +3,8 @@
 /*
  * This file is part of the Dockerisor package.
  *
- * @license    https://opensource.org/licenses/MIT MIT License
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace App\Dockerizor;
@@ -11,7 +12,6 @@ namespace App\Dockerizor;
 use App\Model\Context\App\ComposerAppContext;
 use App\Model\Context\App\NodeAppContext;
 use App\Model\Context\App\PhpAppContext;
-use App\Model\Context\App\PythonAppContext;
 use App\Model\Context\EnvironmentContext;
 use App\Model\Docker\DockerComposeFile;
 use Symfony\Component\Filesystem\Filesystem;
@@ -34,8 +34,6 @@ class AppManager extends AbstractManager
 
     /**
      * Create environment context.
-     * 
-     * @return EnvironmentContext
      */
     public function getEnvironmentContext(): EnvironmentContext
     {
@@ -48,10 +46,6 @@ class AppManager extends AbstractManager
 
     /**
      * Find app contexts.
-     * 
-     * @param EnvironmentContext $environmentContext
-     * 
-     * @return void
      */
     protected function findAppContexts(EnvironmentContext $environmentContext): void
     {
@@ -84,9 +78,7 @@ class AppManager extends AbstractManager
     }
 
     /**
-     * Count file by extensions
-     * 
-     * @return array
+     * Count file by extensions.
      */
     protected function countFileExtensions(): array
     {

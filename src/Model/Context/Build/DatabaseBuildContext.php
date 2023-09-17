@@ -3,7 +3,8 @@
 /*
  * This file is part of the Dockerisor package.
  *
- * @license    https://opensource.org/licenses/MIT MIT License
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace App\Model\Context\Build;
@@ -25,8 +26,6 @@ class DatabaseBuildContext extends AbstractBuildContext implements BuildContextI
 
     /**
      * Get image.
-     * 
-     * @return string
      */
     public function getImage(): string
     {
@@ -35,10 +34,6 @@ class DatabaseBuildContext extends AbstractBuildContext implements BuildContextI
 
     /**
      * Set image.
-     * 
-     * @param string $image
-     * 
-     * @return self
      */
     public function setImage(string $image): self
     {
@@ -49,8 +44,6 @@ class DatabaseBuildContext extends AbstractBuildContext implements BuildContextI
 
     /**
      * Get dsn.
-     * 
-     * @return Dsn
      */
     public function getDsn(): Dsn
     {
@@ -59,10 +52,6 @@ class DatabaseBuildContext extends AbstractBuildContext implements BuildContextI
 
     /**
      * Set dsn.
-     * 
-     * @param Dsn $dsn
-     * 
-     * @return self
      */
     public function setDsn(Dsn $dsn): self
     {
@@ -73,8 +62,6 @@ class DatabaseBuildContext extends AbstractBuildContext implements BuildContextI
 
     /**
      * Get secret.
-     * 
-     * @return string|null
      */
     public function getSecret(): ?string
     {
@@ -83,10 +70,6 @@ class DatabaseBuildContext extends AbstractBuildContext implements BuildContextI
 
     /**
      * Set secret.
-     * 
-     * @param string $secret
-     * 
-     * @return self
      */
     public function setSecret(string $secret): self
     {
@@ -97,8 +80,6 @@ class DatabaseBuildContext extends AbstractBuildContext implements BuildContextI
 
     /**
      * Get vars.
-     * 
-     * @return array
      */
     public function getVars(): array
     {
@@ -107,10 +88,6 @@ class DatabaseBuildContext extends AbstractBuildContext implements BuildContextI
 
     /**
      * Set vars.
-     * 
-     * @param array $vars
-     * 
-     * @return self
      */
     public function setVars(array $vars): self
     {

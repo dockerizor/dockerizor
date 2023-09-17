@@ -3,7 +3,8 @@
 /*
  * This file is part of the Dockerisor package.
  *
- * @license    https://opensource.org/licenses/MIT MIT License
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace App\Model\Context\Build;
@@ -20,8 +21,6 @@ class WebBuildContext extends AbstractBuildContext implements BuildContextInterf
 
     /**
      * Get root dir.
-     * 
-     * @return string
      */
     public function getRootDir(): string
     {
@@ -30,10 +29,6 @@ class WebBuildContext extends AbstractBuildContext implements BuildContextInterf
 
     /**
      * Set root dir.
-     * 
-     * @param string $rootDir
-     * 
-     * @return self
      */
     public function setRootDir(string $rootDir): self
     {
@@ -44,8 +39,6 @@ class WebBuildContext extends AbstractBuildContext implements BuildContextInterf
 
     /**
      * Get port.
-     * 
-     * @return int
      */
     public function getPort(): int
     {
@@ -54,10 +47,6 @@ class WebBuildContext extends AbstractBuildContext implements BuildContextInterf
 
     /**
      * Set port.
-     * 
-     * @param int $port
-     * 
-     * @return self
      */
     public function setPort(int $port): self
     {

@@ -3,33 +3,34 @@
 /*
  * This file is part of the Dockerisor package.
  *
- * @license    https://opensource.org/licenses/MIT MIT License
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace App\Configurator;
 
-use Symfony\Component\Console\Command\Command;
-use App\Model\OS\Alpine;
-use App\Model\Dsn;
-use App\Model\DotenvFile;
-use App\Model\Docker\DockerRun;
-use App\Model\Docker\DockerFile;
-use App\Model\Docker\ComposeFile\Secret;
-use App\Model\Context\EnvironmentContext;
-use App\Model\Context\ConsoleContext;
-use App\Model\Context\Build\WebBuildContext;
-use App\Model\Context\Build\PhpBuildContext;
-use App\Model\Context\Build\DatabaseBuildContext;
-use App\Model\Context\Build\AppBuildContext;
-use App\Model\Context\App\ComposerAppContext;
-use App\Dockerizor\CenterManager;
-use App\Dockerizor\AppManager;
-use App\Composer\Client as ComposerClient;
-use App\Builder\DockerFile\DockerFileBuilder;
-use App\Builder\DockerCompose\WebDockerComposeBuilder;
-use App\Builder\DockerCompose\PhpDockerComposeBuilder;
-use App\Builder\DockerCompose\DatabaseDockerComposeBuilder;
 use App\Builder\AppBuilder;
+use App\Builder\DockerCompose\DatabaseDockerComposeBuilder;
+use App\Builder\DockerCompose\PhpDockerComposeBuilder;
+use App\Builder\DockerCompose\WebDockerComposeBuilder;
+use App\Builder\DockerFile\DockerFileBuilder;
+use App\Composer\Client as ComposerClient;
+use App\Dockerizor\AppManager;
+use App\Dockerizor\CenterManager;
+use App\Model\Context\App\ComposerAppContext;
+use App\Model\Context\Build\AppBuildContext;
+use App\Model\Context\Build\DatabaseBuildContext;
+use App\Model\Context\Build\PhpBuildContext;
+use App\Model\Context\Build\WebBuildContext;
+use App\Model\Context\ConsoleContext;
+use App\Model\Context\EnvironmentContext;
+use App\Model\Docker\ComposeFile\Secret;
+use App\Model\Docker\DockerFile;
+use App\Model\Docker\DockerRun;
+use App\Model\DotenvFile;
+use App\Model\Dsn;
+use App\Model\OS\Alpine;
+use Symfony\Component\Console\Command\Command;
 
 class ComposerConfigurator extends AbstractConfigurator
 {

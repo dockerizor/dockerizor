@@ -7,7 +7,6 @@
         "php": ">=8.1",
         "ext-ctype": "*",
         "ext-iconv": "*",
-        "beluga-php/docker-php": "^3.0@dev",
         "cocur/slugify": "^4.4",
         "composer/semver": "^3.4",
         "foxy/foxy": "^1.3",

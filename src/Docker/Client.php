@@ -3,18 +3,20 @@
 /*
  * This file is part of the Dockerisor package.
  *
- * @license    https://opensource.org/licenses/MIT MIT License
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace App\Docker;
 
+use App\Model\Docker\API\ApiObject;
 use App\Model\Docker\API\Container;
 use App\Model\Docker\API\Secret;
 
 /**
  * Docker socket client.
  */
-class SocketClient
+class Client
 {
     private string $socketPath = '/var/run/docker.sock';
 
@@ -28,45 +30,21 @@ class SocketClient
     /**
      * Get response from docker socket using curl.
      */
-    protected function curlCommand(string $path, string $action = 'GET', array $data = null): string
-    {
-        $data = \is_array($data) ? " -d '".json_encode($data)."'" : '';
-
-        $command = "curl --unix-socket {$this->socketPath} -s -H 'Content-Type: application/json' -X {$action} http://localhost/{$path}{$data}";
-
-        return shell_exec($command);
-    }
-
-    /**
-     * Get response from docker socket using curl.
-     */
-    protected function curl(string $path, string $action = 'GET', array $data = null): string
+    protected function request(string $path, string $action = 'GET', array $data = null): string
     {
         $curl = curl_init();
         curl_setopt_array($curl, [
-            CURLOPT_UNIX_SOCKET_PATH => $this->socketPath,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
-            CURLOPT_URL => "http://localhost/{$path}",
-            CURLOPT_CUSTOMREQUEST => $action,
-            CURLOPT_POSTFIELDS => json_encode($data),
+            \CURLOPT_UNIX_SOCKET_PATH => $this->socketPath,
+            \CURLOPT_RETURNTRANSFER => true,
+            \CURLOPT_HTTPHEADER => ['Content-Type: application/json'],
+            \CURLOPT_URL => "http://localhost/v1.43/{$path}",
+            \CURLOPT_CUSTOMREQUEST => $action,
+            \CURLOPT_POSTFIELDS => json_encode($data),
         ]);
         $response = curl_exec($curl);
         curl_close($curl);
 
         return $response;
-    }
-
-    /**
-     * Get response from docker socket.
-     */
-    protected function request(string $path, string $action = 'GET', array $data = null): string
-    {
-        if (\function_exists('curl_version')) {
-            return $this->curl($path, $action, $data);
-        }
-
-        return $this->curlCommand($path, $action, $data);
     }
 
     /**
@@ -94,12 +72,12 @@ class SocketClient
     /**
      * Get container.
      */
-    public function getContainer(string $id): ?array
+    public function getContainer(string $id): ?ApiObject
     {
         $response = $this->request("containers/$id/json");
         $container = json_decode($response, true);
 
-        return $this->findOrNull($container);
+        return $this->hydrate(ApiObject::class, $container);
     }
 
     /**
@@ -186,7 +164,7 @@ class SocketClient
         $response = $this->request('volumes');
         $volumes = json_decode($response, true);
 
-        return $volumes;
+        return $this->hydrateAll(ApiObject::class, $volumes['Volumes']);
     }
 
     /**
@@ -197,7 +175,7 @@ class SocketClient
         $response = $this->request("volumes/{$name}");
         $volume = json_decode($response, true);
 
-        return $this->findOrNull($volume);
+        return $this->hydrate(ApiObject::class, $volume);
     }
 
     /**

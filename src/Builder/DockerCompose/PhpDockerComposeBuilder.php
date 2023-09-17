@@ -3,7 +3,8 @@
 /*
  * This file is part of the Dockerisor package.
  *
- * @license    https://opensource.org/licenses/MIT MIT License
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace App\Builder\DockerCompose;
@@ -19,12 +20,7 @@ use App\Model\File;
 class PhpDockerComposeBuilder extends DockerComposeBuilder
 {
     /**
-     * Build php service
-     * 
-     * @param AppBuildContext $appBuildContext
-     * @param PhpBuildContext $context
-     * 
-     * @return Service
+     * Build php service.
      */
     public function build(AppBuildContext $appBuildContext, PhpBuildContext $context): Service
     {
