@@ -37,20 +37,17 @@ class DockerizorCenterAddCommand extends Command
 {
     protected DockerizorManager $dockerizorManager;
     protected DockerClient $dockerClient;
-    protected DatabaseResolver $databaseResolver;
 
     protected QuestionHelper $questionHelper;
 
     public function __construct(
         DockerizorManager $dockerManager,
-        DockerClient $dockerClient,
-        DatabaseResolver $databaseResolver
+        DockerClient $dockerClient
     ) {
         parent::__construct();
 
         $this->dockerizorManager = $dockerManager;
         $this->dockerClient = $dockerClient;
-        $this->databaseResolver = $databaseResolver;
     }
 
     protected function configure(): void

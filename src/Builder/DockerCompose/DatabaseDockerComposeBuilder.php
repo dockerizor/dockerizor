@@ -8,16 +8,29 @@
 
 namespace App\Builder\DockerCompose;
 
-use App\Model\Context\Build\AppBuildContext;
-use App\Model\Context\Build\DatabaseBuildContext;
-use App\Model\Docker\ComposeFile\Service;
-use App\Model\Docker\ComposeFile\Service\Network;
-use App\Model\Docker\ComposeFile\Service\Volume;
-use App\Model\Dsn;
+use App\Docker\SocketClient;
 use Cocur\Slugify\Slugify;
+use App\Repository\FileRepository;
+use App\Model\Dsn;
+use App\Model\Docker\ComposeFile\Service\Volume;
+use App\Model\Docker\ComposeFile\Service\Network;
+use App\Model\Docker\ComposeFile\Service;
+use App\Model\Context\Build\DatabaseBuildContext;
+use App\Model\Context\Build\AppBuildContext;
 
 class DatabaseDockerComposeBuilder extends DockerComposeBuilder
 {
+    protected SocketClient $dockerClient;
+
+    public function __construct(
+        FileRepository $fileRepository,
+        SocketClient $dockerClient
+    )
+    {
+        parent::__construct($fileRepository);
+        $this->dockerClient = $dockerClient;
+    }
+
     /**
      * Build the database service.
      *
@@ -31,13 +44,14 @@ class DatabaseDockerComposeBuilder extends DockerComposeBuilder
         $appName = $appBuildContext->getAppName();
         $dsn = $databaseContext->getDsn();
 
+        $databaseVolume = "{$appName}_{$databaseContext->getImage()}";
         // Create service
         $version = (new Slugify())->slugify($dsn->getServerVersion());
         $service = new Service("{$databaseContext->getImage()}_{$version}", $databaseContext->getImage());
         $service->addLabel('dockerizor.enable', 'true')
-            ->addVolume(new Volume('db-data', '/var/lib/mysql'))
+            ->addVolume(new Volume($databaseVolume, '/var/lib/mysql'))
         ;
-        // TODO CREATE Volume
+        $this->dockerClient->createVolume($databaseVolume);
 
         // Set environment variables
         $vars = $this->getEnvironnementByDsn($dsn);
@@ -56,17 +70,14 @@ class DatabaseDockerComposeBuilder extends DockerComposeBuilder
     /**
      * Get the docker image from a DSN.
      * 
-     * @param Dsn $dsn
+     * @param string $driver
      * 
      * @return string|null
      */
-    public function getImageByDsn(Dsn $dsn): ?string
-    {
-        if ('mysql' === $dsn->getDriver() && str_contains($dsn->getServerVersion(false), 'mariadb')) {
-            return 'mariadb';
-        }
-
-        switch ($dsn->getDriver()) {
+    public function getImageByDriver(string $driver): string{
+        switch ($driver) {
+            case 'mariadb':
+                return 'mariadb';
             case 'mysql':
             case 'mysql2':
             case 'pdo_mysql':
@@ -101,7 +112,7 @@ class DatabaseDockerComposeBuilder extends DockerComposeBuilder
     {
         $user = $dsn->getUser();
         $password = $dsn->getPassword() ?? 'root';
-        $image = $this->getImageByDsn($dsn);
+        $image = $this->getImageByDriver($dsn->getDriver());
 
         $vars = [];
         switch ($image) {

@@ -8,27 +8,28 @@
 
 namespace App\Configurator;
 
-use App\Builder\AppBuilder;
-use App\Builder\DockerCompose\DatabaseDockerComposeBuilder;
-use App\Builder\DockerCompose\PhpDockerComposeBuilder;
-use App\Builder\DockerCompose\WebDockerComposeBuilder;
-use App\Builder\DockerFile\DockerFileBuilder;
-use App\Composer\Client as ComposerClient;
-use App\Dockerizor\AppManager;
-use App\Dockerizor\CenterManager;
-use App\Model\Context\App\ComposerAppContext;
-use App\Model\Context\Build\AppBuildContext;
-use App\Model\Context\Build\DatabaseBuildContext;
-use App\Model\Context\Build\PhpBuildContext;
-use App\Model\Context\Build\WebBuildContext;
-use App\Model\Context\ConsoleContext;
-use App\Model\Context\EnvironmentContext;
-use App\Model\Docker\ComposeFile\Secret;
-use App\Model\Docker\DockerFile;
-use App\Model\Docker\DockerRun;
-use App\Model\DotenvFile;
-use App\Model\OS\Alpine;
 use Symfony\Component\Console\Command\Command;
+use App\Model\OS\Alpine;
+use App\Model\Dsn;
+use App\Model\DotenvFile;
+use App\Model\Docker\DockerRun;
+use App\Model\Docker\DockerFile;
+use App\Model\Docker\ComposeFile\Secret;
+use App\Model\Context\EnvironmentContext;
+use App\Model\Context\ConsoleContext;
+use App\Model\Context\Build\WebBuildContext;
+use App\Model\Context\Build\PhpBuildContext;
+use App\Model\Context\Build\DatabaseBuildContext;
+use App\Model\Context\Build\AppBuildContext;
+use App\Model\Context\App\ComposerAppContext;
+use App\Dockerizor\CenterManager;
+use App\Dockerizor\AppManager;
+use App\Composer\Client as ComposerClient;
+use App\Builder\DockerFile\DockerFileBuilder;
+use App\Builder\DockerCompose\WebDockerComposeBuilder;
+use App\Builder\DockerCompose\PhpDockerComposeBuilder;
+use App\Builder\DockerCompose\DatabaseDockerComposeBuilder;
+use App\Builder\AppBuilder;
 
 class ComposerConfigurator extends AbstractConfigurator
 {
@@ -101,9 +102,7 @@ class ComposerConfigurator extends AbstractConfigurator
         $dsn = $dotenvFile = null;
 
         $dotenvFile = new DotenvFile("{$workdir}/.env");
-        if ($dotenvFile->load()) {
-            $dsn = $dotenvFile->getDsn();
-        }
+        $dotenvFile->load();
 
         // Configure app name
         $appName = $this->appManager->getConfig('[app_name]');
@@ -138,12 +137,19 @@ class ComposerConfigurator extends AbstractConfigurator
 
         // Configure database
         $databaseDockerImage = null;
+
+        $dsn = $dotenvFile->getDsn();
+        $databaseUrl = $this->appManager->getConfig('[database_url]');
+        if ($databaseUrl) {
+            $dsn = new Dsn($databaseUrl);
+        }
+
         if ($dsn) {
             $output->writeln("Database detected {$dsn->getDriver()}");
 
-            $phpBuildContext->configureDatabase($dsn);
+            $phpBuildContext->configureDatabase($dsn->getDriver());
 
-            if ($databaseDockerImage = $this->databaseDockerComposeBuilder->getImageByDsn($dsn)) {
+            if ($databaseDockerImage = $this->databaseDockerComposeBuilder->getImageByDriver($dsn->getDriver())) {
                 $databaseBuildContext = new DatabaseBuildContext($dsn, $databaseDockerImage);
             }
 

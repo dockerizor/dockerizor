@@ -311,13 +311,13 @@ class PhpBuildContext extends AbstractBuildContext implements BuildContextInterf
     /**
      * Configure database.
      * 
-     * @param Dsn $dsn
+     * @param string $dsn
      * 
      * @return void
      */
-    public function configureDatabase(Dsn $dsn): void
+    public function configureDatabase(string $driver): void
     {
-        switch ($dsn->getDriver()) {
+        switch ($driver) {
             case 'mysql':
             case 'mysql2':
             case 'pdo_mysql':
