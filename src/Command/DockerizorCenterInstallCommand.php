@@ -9,7 +9,7 @@
 
 namespace App\Command;
 
-use App\Docker\SocketClient as DockerClient;
+use App\Docker\Client;
 use App\Dockerizor\CenterManager as DockerizorManager;
 use App\Model\Docker\ComposeFile\Network;
 use App\Model\Docker\ComposeFile\Service;
@@ -30,11 +30,11 @@ use Symfony\Component\Filesystem\Filesystem;
 class DockerizorCenterInstallCommand extends Command
 {
     protected DockerizorManager $dockerizorManager;
-    protected DockerClient $dockerClient;
+    protected Client $dockerClient;
 
     public function __construct(
         DockerizorManager $dockerizorManager,
-        DockerClient $dockerClient,
+        Client $dockerClient,
     ) {
         parent::__construct();
 

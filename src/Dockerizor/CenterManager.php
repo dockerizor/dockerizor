@@ -9,14 +9,14 @@
 
 namespace App\Dockerizor;
 
-use App\Docker\SocketClient;
+use App\Docker\Client;
 use App\Model\Docker\API\ApiObject;
 use App\Model\Docker\API\Container;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class CenterManager extends AbstractManager
 {
-    protected SocketClient $dockerClient;
+    protected Client $dockerClient;
 
     protected string $configFilename = 'dockerizor-center.json';
     protected array $defaultConfig = [
@@ -28,7 +28,7 @@ class CenterManager extends AbstractManager
     public const NETWORK_FRONTEND_NAME = 'dockerizor-frontend';
     public const NETWORK_BACKEND_NAME = 'dockerizor-backend';
 
-    public function __construct(ParameterBagInterface $parameterBag, SocketClient $dockerClient)
+    public function __construct(ParameterBagInterface $parameterBag, Client $dockerClient)
     {
         parent::__construct($parameterBag);
         $this->dockerClient = $dockerClient;
@@ -68,9 +68,10 @@ class CenterManager extends AbstractManager
     /**
      * Find container.
      */
-    public function findContainer(string $name = null, string $image = null, string $network = null): ?Container
+    public function findContainers(string $name = null, string $image = null, string $network = null): array
     {
         $containers = $this->dockerClient->getContainers();
+        $result = [];
         foreach ($containers as $container) {
             if (
                 (
@@ -86,11 +87,37 @@ class CenterManager extends AbstractManager
                     || str_contains($container->getImage(), $name)
                 )
             ) {
-                return $container;
+                $result[] = $container;
             }
         }
 
-        return null;
+        return $result;
+    }
+
+    /**
+     * Find containers.
+     */
+    public function findContainer(string $name = null, string $image = null, string $network = null): ?Container
+    {
+        return $this->findContainers($name, $image, $network)[0] ?? null;
+    }
+
+    /**
+     * Get database containers.
+     */
+    public function getDatabaseContainers(): array
+    {
+        $containers = $this->findContainers(null, null, self::NETWORK_BACKEND_NAME);
+
+        $result = [];
+        foreach ($containers as $key => $container) {
+            // check preg_match for database container image
+            if (preg_match('/(mariadb|mysql|postgres)/', $container->getImage())) {
+                $result[] = $container;
+            }
+        }
+
+        return $containers;
     }
 
     /**

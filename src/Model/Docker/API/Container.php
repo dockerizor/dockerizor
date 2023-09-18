@@ -16,7 +16,7 @@ class Container extends ApiObject
 {
     public function getName(): string
     {
-        $name = $this->data['name'] ?? '';
+        $name = $this->data['Names'][0] ?? '';
         $name = str_replace('/', '', $name);
 
         return $name;
@@ -24,11 +24,11 @@ class Container extends ApiObject
 
     public function getLabel(string $label): ?string
     {
-        return $this->data['labels'][$label] ?? null;
+        return $this->data['Labels'][$label] ?? null;
     }
 
     public function getNetworks(): array
     {
-        return $this->data['networkSettings']['Networks'];
+        return $this->data['NetworkSettings']['Networks'];
     }
 }

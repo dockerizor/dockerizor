@@ -26,7 +26,7 @@ class AppManager extends AbstractManager
         'app_name' => null,
         'domain' => null,
         'port' => null,
-        'database_url' => null,
+        'database_system' => null,
         'root_directory' => null,
         'extra_extensions' => [],
         'extra_packages' => [],
@@ -53,7 +53,7 @@ class AppManager extends AbstractManager
         $workdir = $environmentContext->getWorkdir();
 
         // Detect composer
-        if ($filesystem->exists($composerFile = "{$workdir}/composer.json")) {
+        if ($filesystem->exists("{$workdir}/composer.json")) {
             $environmentContext->addAppContext(new ComposerAppContext($workdir));
         }
         // Detect node
@@ -62,17 +62,21 @@ class AppManager extends AbstractManager
         }
 
         // Detect by file extensions
-        $fileExtensions = $this->countFileExtensions();
-        foreach ($fileExtensions as $extension => $count) {
-            switch ($extension) {
-                case 'php':
-                    if (!$environmentContext->hasAppContext(ComposerAppContext::class)) {
-                        $contexts[] = new PhpAppContext($composerFile);
-                    }
-                    break;
-                case 'js':
-                    $contexts[] = new NodeAppContext($nodeFile);
-                    break;
+        if (empty($environmentContext->getAppContexts())) {
+            $fileExtensions = $this->countFileExtensions();
+            foreach ($fileExtensions as $extension => $count) {
+                switch ($extension) {
+                    case 'php':
+                        if (!$environmentContext->hasAppContext(ComposerAppContext::class)) {
+                            $environmentContext->addAppContext(new PhpAppContext());
+                        }
+                        break;
+                    case 'js':
+                        if (!$environmentContext->hasAppContext(NodeAppContext::class)) {
+                            $environmentContext->addAppContext(new NodeAppContext($nodeFile));
+                        }
+                        break;
+                }
             }
         }
     }

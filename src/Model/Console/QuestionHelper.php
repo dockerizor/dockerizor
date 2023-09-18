@@ -13,6 +13,7 @@ use Symfony\Component\Console\Helper\QuestionHelper as BaseQuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ChoiceQuestion;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\Console\Question\Question;
 
 class QuestionHelper
@@ -42,16 +43,16 @@ class QuestionHelper
     public function confirm(string $question, bool $default = true): bool
     {
         if ($this->interactive) {
-            return $this->helper->ask($this->input, $this->output, new Question($question, $default));
+            return $this->helper->ask($this->input, $this->output, new ConfirmationQuestion($question, $default));
         }
 
         return $default;
     }
 
-    public function choice(string $question, array $choices, bool $multi = false, string $default = null): string
+    public function choice(string $question, array $choices, bool $multi = false, string $default = null): array|string
     {
         if ($this->interactive) {
-            $question = new ChoiceQuestion($question, $choices);
+            $question = new ChoiceQuestion($question, $choices, $default);
             $question->setMultiselect($multi);
 
             return $this->helper->ask($this->input, $this->output, $question);

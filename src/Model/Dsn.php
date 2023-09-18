@@ -50,6 +50,18 @@ class Dsn
     }
 
     /**
+     * Get system.
+     */
+    public function getSystem(): string
+    {
+        if (preg_match('/mariadb/', $this->getServerVersion())) {
+            return 'mariadb';
+        }
+
+        return $this->getDriver();
+    }
+
+    /**
      * Get host.
      */
     public function getHost(): string
@@ -176,13 +188,22 @@ class Dsn
      */
     public function __toString()
     {
-        $query = http_build_query([
-            'charset' => $this->getCharset(),
-            'serverVersion' => $this->getServerVersion(false),
-        ]);
+        $queryData = [];
+
+        if (!empty($this->getCharset())) {
+            $queryData['charset'] = $this->getCharset();
+        }
+        if (!empty($this->getServerVersion())) {
+            $queryData['serverVersion'] = $this->getServerVersion();
+        }
+
+        $query = '';
+        if (!empty($queryData)) {
+            $query = '?'.http_build_query($queryData);
+        }
 
         return sprintf(
-            '%s://%s:%s@%s:%s/%s?%s',
+            '%s://%s:%s@%s:%s/%s%s',
             $this->getDriver(),
             $this->getUser(),
             $this->getPassword(),

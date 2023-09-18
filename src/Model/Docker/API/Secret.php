@@ -13,11 +13,11 @@ class Secret extends ApiObject
 {
     public function getName(): string
     {
-        return $this->data['spec']['Name'];
+        return $this->data['Spec']['Name'];
     }
 
     public function getLabels(): array
     {
-        return $this->data['spec']['Labels'];
+        return $this->data['Spec']['Labels'];
     }
 }

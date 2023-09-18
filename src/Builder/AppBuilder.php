@@ -59,14 +59,16 @@ class AppBuilder
         }
     }
 
-    public function buildApp(ConsoleContext $consoleContext, AppBuildContext $appBuildContext){
+    public function buildApp(ConsoleContext $consoleContext, AppBuildContext $appBuildContext)
+    {
         $workdir = $appBuildContext->getWorkdir();
         $this->processFiles($consoleContext, $appBuildContext->getFiles(), $workdir);
         $this->processDockerFile($consoleContext, $appBuildContext, $workdir);
         $this->processRuns($consoleContext, $appBuildContext, $workdir);
     }
 
-    protected function processFiles(ConsoleContext $consoleContext, array $files, string $workdir){
+    protected function processFiles(ConsoleContext $consoleContext, array $files, string $workdir)
+    {
         // Process files
         foreach ($files as $file) {
             $path = $file->getPath();
@@ -80,7 +82,8 @@ class AppBuilder
         }
     }
 
-    protected function processDockerFile(ConsoleContext $consoleContext, AppBuildContext $appBuildContext, string $workdir){
+    protected function processDockerFile(ConsoleContext $consoleContext, AppBuildContext $appBuildContext, string $workdir)
+    {
         foreach ($appBuildContext->getBuildContexts() as $context) {
             if ($context->getDockerFile() instanceof DockerFile) {
                 $command = "docker build -f {$workdir}/{$context->getDockerFile()->getPath()} -t {$context->getImage()} .";
@@ -93,7 +96,8 @@ class AppBuilder
         }
     }
 
-    protected function processRuns(ConsoleContext $consoleContext, AppBuildContext $appBuildContext, string $workdir){
+    protected function processRuns(ConsoleContext $consoleContext, AppBuildContext $appBuildContext, string $workdir)
+    {
         foreach ($appBuildContext->getRuns() as $command) {
             $consoleContext->getOutput()->writeln("Executing {$command}...");
             if (!$consoleContext->isModeDryRun()) {

@@ -42,9 +42,9 @@ abstract class AbstractManager
     /**
      * Get workdir.
      */
-    public function getWorkdir(): string
+    public function getWorkdir(bool $force = false): string
     {
-        if (null !== $this->workdir) {
+        if (!$force && null !== $this->workdir) {
             return $this->workdir;
         }
 
@@ -64,6 +64,16 @@ abstract class AbstractManager
         }
 
         return $this->workdir;
+    }
+
+    /**
+     * Set workdir.
+     */
+    public function setWorkdir(string $workdir): self
+    {
+        $this->workdir = $workdir;
+
+        return $this;
     }
 
     /**

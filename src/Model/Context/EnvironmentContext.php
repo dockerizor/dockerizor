@@ -41,6 +41,16 @@ class EnvironmentContext
     }
 
     /**
+     * Set workdir.
+     */
+    public function setWorkdir(string $workdir): self
+    {
+        $this->workdir = $workdir;
+
+        return $this;
+    }
+
+    /**
      * Get app contexts.
      */
     public function getAppContexts(): array
