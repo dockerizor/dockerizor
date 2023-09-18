@@ -77,7 +77,7 @@ class DockerizorDockerizeCommand extends Command
             }
         }
 
-        $this->appBuilder->build($consoleContext, $environmentContext);
+        $this->appBuilder->buildEnv($consoleContext, $environmentContext);
 
         $output->writeln('Done.');
 

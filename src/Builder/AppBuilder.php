@@ -14,6 +14,7 @@ use App\Model\Context\ConsoleContext;
 use App\Model\Context\EnvironmentContext;
 use App\Model\Docker\DockerFile;
 use App\Model\File;
+use App\Model\Process\Process;
 use Symfony\Component\Filesystem\Filesystem;
 
 class AppBuilder
@@ -30,7 +31,7 @@ class AppBuilder
      *
      * @return void
      */
-    public function build(ConsoleContext $consoleContext, EnvironmentContext $environmentContext)
+    public function buildEnv(ConsoleContext $consoleContext, EnvironmentContext $environmentContext)
     {
         $workdir = $environmentContext->getWorkdir();
         $appContexts = $environmentContext->getAppContexts();
@@ -44,6 +45,28 @@ class AppBuilder
             }
         }
 
+        $this->processFiles($consoleContext, $files, $workdir);
+
+        // Execute commands
+        foreach ($appContexts as $appContext) {
+            $appBuildContext = $appContext->getAppBuildContext();
+
+            // Build docker files
+            $this->processDockerFile($consoleContext, $appBuildContext, $workdir);
+
+            // Execute docker runs
+            $this->processRuns($consoleContext, $appBuildContext, $workdir);
+        }
+    }
+
+    public function buildApp(ConsoleContext $consoleContext, AppBuildContext $appBuildContext){
+        $workdir = $appBuildContext->getWorkdir();
+        $this->processFiles($consoleContext, $appBuildContext->getFiles(), $workdir);
+        $this->processDockerFile($consoleContext, $appBuildContext, $workdir);
+        $this->processRuns($consoleContext, $appBuildContext, $workdir);
+    }
+
+    protected function processFiles(ConsoleContext $consoleContext, array $files, string $workdir){
         // Process files
         foreach ($files as $file) {
             $path = $file->getPath();
@@ -55,29 +78,27 @@ class AppBuilder
                 $this->filesystem->dumpFile("{$workdir}/{$path}", $file);
             }
         }
+    }
 
-        // Execute commands
-        foreach ($appContexts as $appContext) {
-            $appBuildContext = $appContext->getAppBuildContext();
-
-            // Build docker files
-            foreach ($appBuildContext->getBuildContexts() as $context) {
-                if ($context->getDockerFile() instanceof DockerFile) {
-                    $command = "cd {$workdir} && docker build -f {$workdir}/{$context->getDockerFile()->getPath()} -t {$context->getImage()} .";
-                    $consoleContext->getOutput()->writeln("Executing {$command}...");
-                    if (!$consoleContext->isModeDryRun()) {
-                        shell_exec($command);
-                    }
-                }
-            }
-
-            // Execute docker runs
-            foreach ($appBuildContext->getRuns() as $run) {
-                $command = "cd {$workdir} && {$run}";
+    protected function processDockerFile(ConsoleContext $consoleContext, AppBuildContext $appBuildContext, string $workdir){
+        foreach ($appBuildContext->getBuildContexts() as $context) {
+            if ($context->getDockerFile() instanceof DockerFile) {
+                $command = "docker build -f {$workdir}/{$context->getDockerFile()->getPath()} -t {$context->getImage()} .";
                 $consoleContext->getOutput()->writeln("Executing {$command}...");
                 if (!$consoleContext->isModeDryRun()) {
-                    shell_exec($command);
+                    $process = new Process($command, $consoleContext->getOutput(), $workdir);
+                    $process->run();
                 }
+            }
+        }
+    }
+
+    protected function processRuns(ConsoleContext $consoleContext, AppBuildContext $appBuildContext, string $workdir){
+        foreach ($appBuildContext->getRuns() as $command) {
+            $consoleContext->getOutput()->writeln("Executing {$command}...");
+            if (!$consoleContext->isModeDryRun()) {
+                $process = new Process($command, $consoleContext->getOutput(), $workdir);
+                $process->run();
             }
         }
     }
