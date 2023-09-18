@@ -15,6 +15,7 @@ use App\Builder\DockerCompose\PhpDockerComposeBuilder;
 use App\Builder\DockerCompose\WebDockerComposeBuilder;
 use App\Builder\DockerFile\DockerFileBuilder;
 use App\Composer\Client as ComposerClient;
+use App\Docker\Client;
 use App\Dockerizor\AppManager;
 use App\Dockerizor\CenterManager;
 use App\Model\Context\App\ComposerAppContext;
@@ -28,7 +29,6 @@ use App\Model\Docker\ComposeFile\Secret;
 use App\Model\Docker\DockerFile;
 use App\Model\Docker\DockerRun;
 use App\Model\DotenvFile;
-use App\Model\Dsn;
 use App\Model\OS\Alpine;
 use Symfony\Component\Console\Command\Command;
 
@@ -41,6 +41,7 @@ class ComposerConfigurator extends AbstractConfigurator
     protected WebDockerComposeBuilder $webDockerComposeBuilder;
     protected DatabaseDockerComposeBuilder $databaseDockerComposeBuilder;
     protected DockerFileBuilder $dockerFileBuilder;
+    protected Client $dockerClient;
     protected ComposerClient $composerClient;
 
     public function __construct(
@@ -51,6 +52,7 @@ class ComposerConfigurator extends AbstractConfigurator
         WebDockerComposeBuilder $webDockerComposeBuilder,
         DatabaseDockerComposeBuilder $databaseDockerComposeBuilder,
         DockerFileBuilder $dockerFileBuilder,
+        Client $dockerClient,
         ComposerClient $composerClient
     ) {
         $this->appManager = $appManager;
@@ -60,6 +62,7 @@ class ComposerConfigurator extends AbstractConfigurator
         $this->webDockerComposeBuilder = $webDockerComposeBuilder;
         $this->databaseDockerComposeBuilder = $databaseDockerComposeBuilder;
         $this->dockerFileBuilder = $dockerFileBuilder;
+        $this->dockerClient = $dockerClient;
         $this->composerClient = $composerClient;
     }
 
@@ -136,27 +139,6 @@ class ComposerConfigurator extends AbstractConfigurator
         $this->appManager->setConfig('[root_directory]', $rootDirectory);
         $output->writeln("Set root directory {$rootDirectory}");
 
-        // Configure database
-        $databaseDockerImage = null;
-
-        $dsn = $dotenvFile->getDsn();
-        $databaseUrl = $this->appManager->getConfig('[database_url]');
-        if ($databaseUrl) {
-            $dsn = new Dsn($databaseUrl);
-        }
-
-        if ($dsn) {
-            $output->writeln("Database detected {$dsn->getDriver()}");
-
-            $phpBuildContext->configureDatabase($dsn->getDriver());
-
-            if ($databaseDockerImage = $this->databaseDockerComposeBuilder->getImageByDriver($dsn->getDriver())) {
-                $databaseBuildContext = new DatabaseBuildContext($dsn, $databaseDockerImage);
-            }
-
-            $output->writeln("Docker image {$databaseDockerImage}");
-        }
-
         // Get networks
         $networks = $this->centerManager->getNetworks();
 
@@ -174,33 +156,78 @@ class ComposerConfigurator extends AbstractConfigurator
 
         // Detect Dockerizor Center
         $output->writeln('Detect Dockerizor Center');
-        $databaseContainer = $traefikContainer = null;
         $usedPorts = $this->centerManager->getUsedPorts();
 
-        if (
-            ($container = $this->centerManager->findContainer($databaseDockerImage, null, $backendNetworkName))
-            && 'secret' === $container->getLabel('dockerizor.secret.method')
-            && $secret = $container->getLabel('dockerizor.secret.name')
-            && $consoleContext->getQuestionHelper()->confirm("We have detected {$databaseDockerImage} do you want use it ? [y,n] n : ", false)
-        ) {
-            $output->writeln('Config database DNS');
+        // Configure database
+        $databaseDockerImage = null;
 
-            $databaseContainer = $container;
-            $databaseContainerFull = $this->centerManager->getContainer($databaseContainer->getId());
-            $databaseContainerBackendAlias = $databaseContainerFull['NetworkSettings']['Networks'][$backendNetworkName]['Aliases'][0];
-
-            $databaseBuildContext->setSecret($secret);
-
-            $dsn->setHost($databaseContainerBackendAlias);
-            $dsn->setPassword("\$(cat '/var/run/secrets/{$secret}')");
-
-            $appBuildContext->getDockerComposeFile()->addSecret(new Secret($secret, true));
-
-            $dotenvFile->set('DATABASE_URL', $dsn->__toString());
+        // Get database system
+        $databaseSystem = $this->appManager->getConfig('[database_system]');
+        if (!$databaseSystem) {
+            $databaseSystem = $consoleContext->getQuestionHelper()->choice('Database system', [
+                'mysql' => 'mysql',
+                'mariadb' => 'mariadb',
+                'postgresql' => 'postgresql',
+                'sqlite' => 'sqlite',
+                null => 'no database',
+            ], false);
         }
 
+        $databaseBuildContext = null;
+        if ($databaseSystem) {
+            $this->appManager->setConfig('[database_system]', $databaseSystem);
+            $dsn = $this->databaseDockerComposeBuilder->createDsnFromSystem($databaseSystem);
+
+            $output->writeln("Config database system {$databaseSystem}");
+
+            $phpBuildContext->configureDatabase($dsn->getDriver());
+
+            // Get database docker image
+            if (!$databaseDockerImage = $this->databaseDockerComposeBuilder->getImageBySystem($databaseSystem)) {
+                $output->writeln("<error>Database system {$dsn->getDriver()} not supported</error>");
+
+                return Command::FAILURE;
+            }
+
+            $databaseBuildContext = new DatabaseBuildContext("{$appName}_{$databaseDockerImage}", $dsn, $databaseDockerImage);
+
+            // Find database container
+            $databaseContainer = $this->centerManager->findContainer($databaseDockerImage, null, $backendNetworkName);
+            if ($databaseContainer) {
+                if (
+                    'secret' === $databaseContainer->getLabel('dockerizor.secret.method')
+                    && ($secret = $databaseContainer->getLabel('dockerizor.secret.name'))
+                    && ($serviceName = $databaseContainer->getLabel('com.docker.swarm.service.name'))
+                    && $consoleContext->getQuestionHelper()->confirm("We have detected Dockerizor Center '{$serviceName}' do you want use it ? [y,n] y : ", true)
+                ) {
+                    $output->writeln('Config database DNS');
+
+                    $databaseHost = $databaseContainer->getLabel('dockerizor.host');
+
+                    $databaseBuildContext->setSecret($secret);
+
+                    $dsn->setHost($databaseHost);
+                    $dsn->setPassword("\$(cat '/var/run/secrets/{$secret}')");
+
+                    $appBuildContext->getDockerComposeFile()->addSecret(new Secret($secret, true));
+
+                    $dotenvFile->set('DATABASE_URL', $dsn->__toString());
+                }
+            } elseif ($consoleContext->getQuestionHelper()->confirm("Do you want to create service for database {$databaseDockerImage}:{$dsn->getServerVersion()} ? [y,n] y : ", true)) {
+                $output->writeln("Create database service {$databaseDockerImage}:{$dsn->getServerVersion()}");
+                $secret = "{$databaseSystem}_root_password";
+                $this->dockerClient->createSecret($secret, $this->appManager->generatePassword());
+                $dsn->setPassword("\$(cat '/var/run/secrets/{$secret}')");
+                $dsn->setHost("{$appName}-{$databaseBuildContext->getImage()}");
+            } else {
+                unset($databaseBuildContext);
+            }
+        }
+
+        // Detect traefik
+        $traefikContainer = null;
         if ($container = $this->centerManager->findContainer(null, 'traefik', $frontendNetworkName)) {
-            $consoleContext->getQuestionHelper()->confirm('We have detected traefik do you want use it ? [y,n] n : ', false);
+            $consoleContext->getQuestionHelper()->confirm('We have detected traefik do you want use it ? [y,n] y : ', true);
             $traefikContainer = $container;
             $appBuildContext->setProxyContainer($traefikContainer);
         }
@@ -232,29 +259,24 @@ class ComposerConfigurator extends AbstractConfigurator
             $this->appManager->setConfig('[port]', $port);
         }
 
-        // Create database service
-        $createDatabase = false;
-        if (
-            $databaseDockerImage
-            && !$databaseContainer
-            && $consoleContext->getQuestionHelper()->confirm("Do you want to create service for database {$databaseDockerImage}:{$dsn->getServerVersion()} ? [y,n] y : ", true)
-        ) {
-            $output->writeln("Create database service {$databaseDockerImage}:{$dsn->getServerVersion()}");
-            $createDatabase = true;
-            // TODO Create secret
-        }
-
+        // Php extensions suggestions
         if (!empty($extentionSuggestions)) {
             $selectedSuggestions = $extentionSuggestions;
             if ($consoleContext->isModeInteractive()) {
+                $choices = array_combine($extentionSuggestions, $extentionSuggestions);
+                $choices['none'] = 'none (default)';
                 $selectedSuggestions = $consoleContext->getQuestionHelper()->choice(
                     'Install other PHP extensions from suggestions ? (eg : zip, gd)',
-                    array_combine($extentionSuggestions, $extentionSuggestions)
+                    $choices,
+                    true,
+                    'none'
                 );
             }
 
             foreach ($selectedSuggestions as $selectedSuggestion) {
-                $phpBuildContext->addExtension($selectedSuggestion);
+                if ('none' !== $selectedSuggestion) {
+                    $phpBuildContext->addExtension($selectedSuggestion);
+                }
             }
 
             $extraExtensions = array_merge($extraExtensions, $selectedSuggestions);
@@ -273,7 +295,7 @@ class ComposerConfigurator extends AbstractConfigurator
         $packagesList = implode(', ', $operatingSystem->getPackages());
 
         if ($consoleContext->isModeInteractive()) {
-            if (!$consoleContext->getQuestionHelper()->confirm("Install <info>PHP v{$phpMinorVersion}</info>\nWith extensions <info>{$extensionsList}</info>\nWith packages <info>{$packagesList}</info>, continue ? [y,n] n : ", false)) {
+            if (!$consoleContext->getQuestionHelper()->confirm("Install <info>PHP v{$phpMinorVersion}</info>\nWith extensions <info>{$extensionsList}</info>\nWith packages <info>{$packagesList}</info>, continue ? [y,n] y : ", true)) {
                 $output->writeln('<error>Dockerisation canceled</error>');
 
                 return Command::SUCCESS;
@@ -306,7 +328,7 @@ class ComposerConfigurator extends AbstractConfigurator
         $this->webDockerComposeBuilder->build($appBuildContext, $webBuildContext);
         $this->phpDockerComposeBuilder->build($appBuildContext, $phpBuildContext);
 
-        if ($createDatabase) {
+        if ($databaseBuildContext) {
             $this->databaseDockerComposeBuilder->build($appBuildContext, $databaseBuildContext);
         }
 

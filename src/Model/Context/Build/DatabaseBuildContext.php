@@ -13,15 +13,25 @@ use App\Model\Dsn;
 
 class DatabaseBuildContext extends AbstractBuildContext implements BuildContextInterface
 {
-    protected string $image;
+    protected string $name;
     protected Dsn $dsn;
+    protected string $image;
     protected ?string $secret = null;
     protected array $vars = [];
 
-    public function __construct(Dsn $dsn, string $image)
+    public function __construct(string $name, Dsn $dsn, string $image)
     {
-        $this->image = $image;
+        $this->name = $name;
         $this->dsn = $dsn;
+        $this->image = $image;
+    }
+
+    /**
+     * Get name.
+     */
+    public function getName(): string
+    {
+        return $this->name;
     }
 
     /**
@@ -94,5 +104,20 @@ class DatabaseBuildContext extends AbstractBuildContext implements BuildContextI
         $this->vars = $vars;
 
         return $this;
+    }
+
+    public function getVolumeName()
+    {
+        return $this->getName().'_data';
+    }
+
+    public function getSecretName()
+    {
+        return $this->getName().'_secret';
+    }
+
+    public function getServiceName()
+    {
+        return $this->getName();
     }
 }

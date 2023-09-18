@@ -17,7 +17,6 @@ use App\Model\Docker\ComposeFile\Service\Network;
 use App\Model\Docker\ComposeFile\Service\Volume;
 use App\Model\Dsn;
 use App\Repository\FileRepository;
-use Cocur\Slugify\Slugify;
 
 class DatabaseDockerComposeBuilder extends DockerComposeBuilder
 {
@@ -36,28 +35,64 @@ class DatabaseDockerComposeBuilder extends DockerComposeBuilder
      *
      * @return Service
      */
-    public function build(AppBuildContext $appBuildContext, DatabaseBuildContext $databaseContext)
+    public function build(AppBuildContext $appBuildContext, DatabaseBuildContext $databaseBuildContext)
     {
-        $appName = $appBuildContext->getAppName();
-        $dsn = $databaseContext->getDsn();
+        $dsn = $databaseBuildContext->getDsn();
 
-        $databaseVolume = "{$appName}_{$databaseContext->getImage()}";
+        $volumeName = $databaseBuildContext->getVolumeName();
         // Create service
-        $version = (new Slugify())->slugify($dsn->getServerVersion());
-        $service = new Service("{$databaseContext->getImage()}_{$version}", $databaseContext->getImage());
+        $service = new Service($databaseBuildContext->getName(), $databaseBuildContext->getImage());
         $service->addLabel('dockerizor.enable', 'true')
-            ->addVolume(new Volume($databaseVolume, '/var/lib/mysql'))
-        ;
-        $this->dockerClient->createVolume($databaseVolume);
+            ->addLabel('dockerizor.host', $dsn->getHost());
 
-        // Set environment variables
-        $vars = $this->getEnvironnementByDsn($dsn);
-        if (!empty($vars)) {
-            $service->addEnvironmentVariables($vars);
+        // Prepare credentials
+        if ($secret = $databaseBuildContext->getSecret()) {
+            $varSuffix = '_FILE';
+            $service->addSecret($secret);
+            $password = "/var/run/secrets/{$secret}";
+
+            $service->addLabel('dockerizor.secret.method', 'secret');
+            $service->addLabel('dockerizor.secret.name', $secret);
+        } else {
+            $varSuffix = '';
+            $password = $dsn->getPassword();
         }
 
+        // Add environment variables and set target volume
+        $targetVolume = null;
+        switch ($dsn->getSystem()) {
+            case 'mysql':
+                $service->addEnvironmentVariables([
+                    "MYSQL_ROOT_PASSWORD{$varSuffix}" => $password,
+                ]);
+                $targetVolume = '/var/lib/mysql';
+                break;
+            case 'mariadb':
+                $service->addEnvironmentVariables([
+                    "MARIADB_ROOT_PASSWORD{$varSuffix}" => $password,
+                ]);
+                $targetVolume = '/var/lib/mysql';
+                break;
+            case 'postgres':
+                $service->addEnvironmentVariables([
+                    "POSTGRES_PASSWORD{$varSuffix}" => $password,
+                ]);
+                $targetVolume = '/var/lib/postgresql/data';
+                break;
+            case 'mongodb':
+                $service->addEnvironmentVariables([
+                    'MONGO_INITDB_ROOT_USERNAME' => 'admin',
+                    "MONGO_INITDB_ROOT_PASSWORD{$varSuffix}" => $password,
+                ]);
+                $targetVolume = '/data/db';
+                break;
+        }
+
+        $service->addVolume(new Volume($volumeName, $targetVolume));
+        $this->dockerClient->createVolume($volumeName);
+
         // Add backend network
-        $service->addNetwork((new Network($appBuildContext->getBackendNetwork()))->addAlias("{$appName}-{$databaseContext->getImage()}"));
+        $service->addNetwork((new Network($appBuildContext->getBackendNetwork()))->addAlias($dsn->getHost()));
 
         $appBuildContext->getDockerComposeFile()->addService($service);
 
@@ -69,9 +104,9 @@ class DatabaseDockerComposeBuilder extends DockerComposeBuilder
      *
      * @return string|null
      */
-    public function getImageByDriver(string $driver): string
+    public function getImageBySystem(string $system): string
     {
-        switch ($driver) {
+        switch ($system) {
             case 'mariadb':
                 return 'mariadb';
             case 'mysql':
@@ -98,53 +133,15 @@ class DatabaseDockerComposeBuilder extends DockerComposeBuilder
     }
 
     /**
-     * Get the environnement variables from a DSN.
+     * Create a DSN from a system.
      */
-    public function getEnvironnementByDsn(Dsn $dsn): ?array
+    public function createDsnFromSystem(string $system)
     {
-        $user = $dsn->getUser();
-        $password = $dsn->getPassword() ?? 'root';
-        $image = $this->getImageByDriver($dsn->getDriver());
-
-        $vars = [];
-        switch ($image) {
-            case 'mysql':
-                if ('root' !== $user) {
-                    $vars['MYSQL_USER'] = $user;
-                    $vars['MYSQL_PASSWORD'] = $password;
-                }
-
-                $vars['MYSQL_ROOT_PASSWORD'] = $password;
-
-                return $vars;
-            case 'postgres':
-                if ('postgres' !== $user) {
-                    $vars['POSTGRES_USER'] = $user;
-                    $vars['POSTGRES_PASSWORD'] = $password;
-                }
-
-                return $vars;
-            case 'mariadb':
-                if ('root' !== $user) {
-                    $vars['MARIADB_USER'] = $user;
-                    $vars['MARIADB_PASSWORD'] = $password;
-                }
-
-                $vars['MARIADB_ROOT_PASSWORD'] = $password;
-
-                return $vars;
-            case 'mongodb':
-                $vars['MONGO_INITDB_ROOT_USERNAME'] = $user;
-                $vars['MONGO_INITDB_ROOT_PASSWORD'] = $password;
-
-                return $vars;
-            case 'mcr.microsoft.com/mssql/server':
-                return [
-                    'ACCEPT_EULA' => 'Y',
-                    'SA_PASSWORD' => $password,
-                ];
+        $driver = $system;
+        if ('mariadb' === $system) {
+            $driver = 'mysql';
         }
 
-        return null;
+        return new Dsn("{$driver}://root:root@localhost:3306/database?charset=utf8");
     }
 }
