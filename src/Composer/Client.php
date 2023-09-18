@@ -9,6 +9,8 @@
 
 namespace App\Composer;
 
+use App\Model\Process\Process;
+
 /**
  * Composer client.
  */
@@ -30,9 +32,11 @@ class Client
      */
     public function getPlatformReqs(): array
     {
-        $result = shell_exec("cd {$this->workdir} && composer check-platform-reqs -f json");
+        $process = new Process('composer check-platform-reqs -f json', null, $this->workdir);
+        $process->setShowOutput(false);
+        $process->run();
 
-        return $this->platformReqs = json_decode($result, true);
+        return $this->platformReqs = json_decode($process->getOutput(), true);
     }
 
     /**
@@ -82,7 +86,11 @@ class Client
      */
     public function getExtensionSuggetions(): array
     {
-        $result = shell_exec('cd app && composer suggests --all --list');
+        $process = new Process('composer suggests --all --list', null, $this->workdir);
+        $process->setShowOutput(false);
+        $process->run();
+
+        $result = $process->getOutput();
 
         if (empty($result)) {
             return [];
