@@ -4,6 +4,8 @@
 use App\Kernel;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 
+set_include_path(get_include_path() . PATH_SEPARATOR . "/dockerizor");
+
 $_SERVER['SCRIPT_FILENAME'] = 'bin/console';
 
 if (!is_file(dirname(__DIR__).'/vendor/autoload_runtime.php')) {

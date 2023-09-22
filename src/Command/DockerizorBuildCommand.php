@@ -9,6 +9,13 @@
 
 namespace App\Command;
 
+use App\Builder\AppBuilder;
+use App\Builder\DockerFile\DockerFileBuilder;
+use App\Model\Context\Build\AppBuildContext;
+use App\Model\Context\Build\BuildContext;
+use App\Model\Context\ConsoleContext;
+use App\Model\Docker\DockerFile;
+use App\Model\OS\Alpine;
 use Phar;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -19,21 +26,32 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 #[AsCommand(name: 'dkz:build')]
 class DockerizorBuildCommand extends Command
 {
-    protected $params;
+    protected AppBuilder $appBuilder;
+    protected DockerFileBuilder $dockerFileBuilder;
+    protected ParameterBagInterface $parameterBag;
 
-    public function __construct(ParameterBagInterface $params)
+    public function __construct(AppBuilder $appBuilder, DockerFileBuilder $dockerFileBuilder, ParameterBagInterface $parameterBag)
     {
-        $this->params = $params;
+        $this->appBuilder = $appBuilder;
+        $this->dockerFileBuilder = $dockerFileBuilder;
+        $this->parameterBag = $parameterBag;
         parent::__construct();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $appdir = $this->params->get('kernel.project_dir');
-        $workdir = $this->params->get('kernel.project_dir').'/var/build';
+        $consoleContext = new ConsoleContext($this, $input, $output);
 
-        try {
-            $pharFile = "$workdir/dockerizor.phar";
+        $workdir = $this->parameterBag->get('kernel.project_dir');
+
+        $buildPhar = false;
+        if ($buildPhar) {
+            $phardir = $this->parameterBag->get('kernel.project_dir').'/var/build';
+
+            /**
+             * Build Phar.
+             */
+            $pharFile = "$phardir/dockerizor.phar";
 
             // clean up
             if (file_exists($pharFile)) {
@@ -55,12 +73,12 @@ class DockerizorBuildCommand extends Command
 
             // Add the rest of the apps files
             $finder = new \Symfony\Component\Finder\Finder();
-            $finder->in($appdir)->exclude('app')->files();
+            $finder->in($workdir)->exclude('app')->files();
             $dirs = [
-                '.env' => $appdir.'/.env',
+                '.env' => $workdir.'/.env',
             ];
             foreach ($finder as $dir) {
-                $dirs[str_replace("$appdir/", '', $dir)] = $dir->getRealPath();
+                $dirs[str_replace("$workdir/", '', $dir)] = $dir->getRealPath();
             }
 
             $phar->buildFromIterator(new \ArrayIterator($dirs));
@@ -78,11 +96,42 @@ class DockerizorBuildCommand extends Command
 
             // Make the file executable
             chmod($pharFile, 0770);
-
-            echo "$pharFile successfully created".\PHP_EOL;
-        } catch (\Exception $e) {
-            echo $e->getMessage();
         }
+
+        /**
+         * Build Dockerfile.
+         */
+        $alpine = new Alpine('php:alpine');
+        $alpine->addPackage('bash');
+        $dockerFile = new DockerFile($alpine);
+
+        $appBuildContext = new AppBuildContext('dockerizor', $workdir);
+
+        $buildContext = new BuildContext();
+        $buildContext->setDockerFile($dockerFile);
+        $buildContext->setImage('dockerizor:latest');
+        $appBuildContext->addBuildContext($buildContext);
+
+        $this->dockerFileBuilder->build($appBuildContext, $buildContext);
+
+        $dockerFile->addCopy('--from=docker /usr/local/bin/*', '/usr/local/bin/');
+
+        $dockerFile->addCopy('.env', '/dockerizor/.env');
+        $dockerFile->addCopy('./bin', '/dockerizor/bin');
+        $dockerFile->addCopy('./config', '/dockerizor/config');
+        $dockerFile->addCopy('./src', '/dockerizor/src');
+        $dockerFile->addCopy('./vendor', '/dockerizor/vendor');
+        $dockerFile->addEnv('DOCKERIZOR_DOCKER', 'true');
+
+        $dockerFile->addRun('ln -s /dockerizor/bin/console /usr/local/bin/dockerizor');
+        $dockerFile->addRun('chmod +x /usr/local/bin/dockerizor');
+        $dockerFile->addWorkdir('/app');
+
+        $dockerFile->addCopy('./docker/entrypoint.sh', '/entrypoint.sh');
+        $dockerFile->addRun('chmod +x /entrypoint.sh');
+        $dockerFile->addEntrypoint('["/entrypoint.sh"]');
+
+        $this->appBuilder->buildApp($consoleContext, $appBuildContext);
 
         return Command::SUCCESS;
     }

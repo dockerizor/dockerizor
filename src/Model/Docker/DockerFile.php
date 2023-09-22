@@ -82,6 +82,46 @@ class DockerFile implements FileInterface
     }
 
     /**
+     * Add WORKDIR instruction to the dockerfile.
+     */
+    public function addWorkdir(string $path): self
+    {
+        $this->instructions[] = "WORKDIR $path";
+
+        return $this;
+    }
+
+    /**
+     * Add CMD instruction to the dockerfile.
+     */
+    public function addCmd(string $command): self
+    {
+        $this->instructions[] = "CMD $command";
+
+        return $this;
+    }
+
+    /**
+     * Add ENV instruction to the dockerfile.
+     */
+    public function addEnv(string $key, string $value): self
+    {
+        $this->instructions[] = "ENV $key=$value";
+
+        return $this;
+    }
+
+    /**
+     * Add ENTRYPOINT instruction to the dockerfile.
+     */
+    public function addEntrypoint(string $command): self
+    {
+        $this->instructions[] = "ENTRYPOINT $command";
+
+        return $this;
+    }
+
+    /**
      * Add COPY instruction to the dockerfile.
      *
      * @return self
