@@ -11,9 +11,9 @@ namespace App\Model\Context\App;
 
 use App\Model\Context\Build\AppBuildContext;
 
-abstract class AbstractAppContext
+class AppContext
 {
-    protected AppBuildContext $buildContext;
+    protected ?AppBuildContext $buildContext = null;
 
     /**
      * Set app build context.
@@ -28,7 +28,7 @@ abstract class AbstractAppContext
     /**
      * Get app build context.
      */
-    public function getAppBuildContext(): AppBuildContext
+    public function getAppBuildContext(): ?AppBuildContext
     {
         return $this->buildContext;
     }

@@ -21,7 +21,10 @@ class Process
     protected bool $showOutput = true;
     protected bool $saveOutErr = false;
     protected bool $saveOutOut = true;
+    protected bool $tty = false;
     protected array $outputLines = [];
+    protected ?int $timeout = null;
+    protected ?int $idleTimeout = null;
 
     public function __construct(string $command, Output $output = null, string $workdir = null)
     {
@@ -37,6 +40,9 @@ class Process
             chdir($this->workdir);
         }
         $process = BaseProcess::fromShellCommandline($this->command);
+        $process->setTty($this->tty);
+        $process->setTimeout($this->timeout);
+        $process->setIdleTimeout($this->idleTimeout);
         $process->start();
         $process->wait(function ($type, $buffer): void {
             switch ($type) {
@@ -66,6 +72,7 @@ class Process
                     break;
             }
         });
+
         if ($this->workdir) {
             chdir($originalWorkdir);
         }
@@ -99,6 +106,13 @@ class Process
         return $this;
     }
 
+    public function setTty(bool $tty): self
+    {
+        $this->tty = $tty;
+
+        return $this;
+    }
+
     public function getOutput(): string
     {
         return implode("\n", $this->outputLines);
@@ -107,5 +121,19 @@ class Process
     public function getOutputLines(): array
     {
         return $this->outputLines;
+    }
+
+    public function setTimeout(int $timeout): self
+    {
+        $this->timeout = $timeout;
+
+        return $this;
+    }
+
+    public function setIdleTimeout(int $idleTimeout): self
+    {
+        $this->idleTimeout = $idleTimeout;
+
+        return $this;
     }
 }

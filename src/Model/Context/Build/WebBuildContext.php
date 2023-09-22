@@ -9,7 +9,7 @@
 
 namespace App\Model\Context\Build;
 
-class WebBuildContext extends AbstractBuildContext implements BuildContextInterface
+class WebBuildContext extends BuildContext implements BuildContextInterface
 {
     protected string $rootDir = '/var/www/html';
     protected int $port = 80;

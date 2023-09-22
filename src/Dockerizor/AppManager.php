@@ -27,6 +27,7 @@ class AppManager extends AbstractManager
         'domain' => null,
         'port' => null,
         'database_system' => null,
+        'database_name' => null,
         'root_directory' => null,
         'extra_extensions' => [],
         'extra_packages' => [],

@@ -9,7 +9,7 @@
 
 namespace App\Model\Context\App;
 
-class NodeAppContext extends AbstractAppContext implements AppContextInterface
+class NodeAppContext extends AppContext implements AppContextInterface
 {
     protected string $filename;
     protected array $data;

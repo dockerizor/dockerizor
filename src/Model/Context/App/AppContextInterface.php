@@ -9,6 +9,11 @@
 
 namespace App\Model\Context\App;
 
+use App\Model\Context\Build\AppBuildContext;
+
 interface AppContextInterface
 {
+    public function setAppBuildContext(AppBuildContext $buildContext): AppContext;
+
+    public function getAppBuildContext(): ?AppBuildContext;
 }

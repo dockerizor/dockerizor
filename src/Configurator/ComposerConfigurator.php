@@ -109,7 +109,7 @@ class ComposerConfigurator extends AbstractConfigurator
         $dotenvFile->load();
 
         // Configure app name
-        $appName = $this->appManager->getConfig('[app_name]');
+        $appName = $this->appManager->getConfig('[app_name]') ?? basename($workdir);
         $appName = $consoleContext->getQuestionHelper()->ask("App name (eg myproject) ? {$appName} : ", $appName);
 
         $this->appManager->setConfig('[app_name]', $appName);
@@ -177,6 +177,8 @@ class ComposerConfigurator extends AbstractConfigurator
         if ($databaseSystem) {
             $this->appManager->setConfig('[database_system]', $databaseSystem);
             $dsn = $this->databaseDockerComposeBuilder->createDsnFromSystem($databaseSystem);
+            $dsn->setDatabase($this->appManager->getConfig('[database_name]') ?? strtolower($appName));
+            $this->appManager->setConfig('[database_name]', $dsn->getDatabase());
 
             $output->writeln("Config database system {$databaseSystem}");
 
@@ -279,7 +281,7 @@ class ComposerConfigurator extends AbstractConfigurator
                 }
             }
 
-            $extraExtensions = array_merge($extraExtensions, $selectedSuggestions);
+            $extraExtensions = array_unique(array_merge($extraExtensions, $selectedSuggestions));
 
             $this->appManager->setConfig('[extra_extensions]', $extraExtensions);
         }
@@ -332,7 +334,7 @@ class ComposerConfigurator extends AbstractConfigurator
             $this->databaseDockerComposeBuilder->build($appBuildContext, $databaseBuildContext);
         }
 
-        $appBuildContext->addRun(new DockerRun($phpBuildContext->getImage(), 'composer install --ignore-platform-reqs', '.:/app'));
+        $appBuildContext->addRun(new DockerRun($phpBuildContext->getImage(), 'composer install --ignore-platform-reqs -n'));
 
         return Command::SUCCESS;
     }

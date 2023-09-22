@@ -57,14 +57,16 @@ class NodeConfigurator extends AbstractConfigurator
             $appBuildContext->setDockerComposeFile($composerAppContext->getAppBuildContext()->getDockerComposeFile());
 
             if ($framework) {
+                $install = null;
                 if ($install = $framework->getNodeRunInstallCommand()) {
-                    $appBuildContext->addRun(new DockerRun('node:lts', $install, '.:/app'));
+                    $appBuildContext->addRun(new DockerRun('node:lts', $install));
                 }
                 if ($build = $framework->getNodeRunBuildCommand()) {
-                    $appBuildContext->addRun(new DockerRun('node:lts', $build, '.:/app'));
+                    $appBuildContext->addRun(new DockerRun('node:lts', $build));
                 }
                 if ($dev = $framework->getNodeRunDevCommand()) {
-                    $nodeBuildContext->setCommand($dev);
+                    $command = ($install ? "{$install} && " : '').$dev;
+                    $nodeBuildContext->setCommand("sh -c \"{$command}\"");
                 }
             }
         }

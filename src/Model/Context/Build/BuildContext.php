@@ -11,9 +11,10 @@ namespace App\Model\Context\Build;
 
 use App\Model\Docker\DockerFile;
 
-abstract class AbstractBuildContext
+class BuildContext implements BuildContextInterface
 {
     protected ?DockerFile $dockerFile = null;
+    protected ?string $image = null;
 
     /**
      * Set docker file.
@@ -31,5 +32,23 @@ abstract class AbstractBuildContext
     public function getDockerFile(): ?DockerFile
     {
         return $this->dockerFile;
+    }
+
+    /**
+     * Get image.
+     */
+    public function getImage(): string
+    {
+        return $this->image;
+    }
+
+    /**
+     * Set image.
+     */
+    public function setImage(string $image): self
+    {
+        $this->image = $image;
+
+        return $this;
     }
 }

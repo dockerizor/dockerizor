@@ -30,8 +30,10 @@ class ConsoleContext
         $this->input = $input;
         $this->output = $output;
 
-        $this->modeDryRun = $input->getOption('dry-run');
-        if ($this->modeDryRun) {
+        if (
+            $input->hasOption('dry-run')
+            && ($this->modeDryRun = $input->getOption('dry-run'))
+        ) {
             $output->writeln('<info>Dry run actived</info>');
         }
 

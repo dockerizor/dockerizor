@@ -9,10 +9,9 @@
 
 namespace App\Model\Context\Build;
 
-class NodeBuildContext extends AbstractBuildContext implements BuildContextInterface
+class NodeBuildContext extends BuildContext implements BuildContextInterface
 {
     protected string $version;
-    protected string $image;
     protected string $command;
 
     public function __construct(string $version = 'lts', string $image = 'node:lts-alpine')
@@ -27,14 +26,6 @@ class NodeBuildContext extends AbstractBuildContext implements BuildContextInter
     public function getVersion(): string
     {
         return $this->version;
-    }
-
-    /**
-     * Get image.
-     */
-    public function getImage(): string
-    {
-        return $this->image;
     }
 
     /**

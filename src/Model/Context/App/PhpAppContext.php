@@ -9,6 +9,6 @@
 
 namespace App\Model\Context\App;
 
-class PhpAppContext extends AbstractAppContext implements AppContextInterface
+class PhpAppContext extends AppContext implements AppContextInterface
 {
 }

@@ -17,93 +17,41 @@ use App\Model\Context\Build\PhpBuildContext;
 class Alpine extends OperatingSystem
 {
     protected string $name = 'alpine';
+    protected array $phpExtenssionDependencies = [
+        'pdo_pgsql' => ['postgresql-dev'],
+        'pgsql' => ['postgresql-dev'],
+        'libxml' => ['libxml2-dev'],
+        'gd' => ['libpng-dev', 'libjpeg-turbo-dev', 'freetype-dev'],
+        'dba' => ['enchant2-dev'],
+        'gmp' => ['gmp-dev'],
+        'gettext' => ['gettext-dev'],
+        'ldap' => ['ldb-dev', 'openldap-dev', 'libldap'],
+        'imap' => ['krb5-dev', 'imap-dev'],
+        'odbc' => ['unixodbc-dev'],
+        'pdo_odbc' => ['unixodbc-dev'],
+        'pdo_dblib' => ['freetds-dev'],
+        'pspell' => ['aspell-dev'],
+        'simplexml' => ['libxml2-dev'],
+        'snmp' => ['net-snmp-dev'],
+        'tidy' => ['tidyhtml-dev'],
+        'xsl' => ['libxslt-dev'],
+        'curl' => ['curl-dev'],
+        'phar' => ['openssl-dev'],
+        'intl' => ['icu-dev'],
+        'zip' => ['libzip-dev'],
+        'iconv' => ['gnu-libiconv-dev'],
+        'mbstring' => ['oniguruma-dev'],
+        'sockets' => ['linux-headers'],
+    ];
 
     /**
      * Add packages from PHP config.
      */
     public function addPackagesFromPhpBuildContext(PhpBuildContext $phpContext): self
     {
-        foreach ($phpContext->getExtensions() as $key => $extension) {
-            switch ($extension) {
-                case 'pdo_pgsql':
-                    $this->addPackage('postgresql-dev');
-                    break;
-                case 'pdo_pgsql':
-                case 'pgsql':
-                    $this->addPackage('postgresql-dev');
-                    break;
-                case 'libxml':
-                    $this->addPackage('libxml2-dev');
-                    break;
-                case 'gd':
-                    $this->addPackage('libpng-dev');
-                    $this->addPackage('libjpeg-turbo-dev');
-                    $this->addPackage('freetype-dev');
-                    $phpContext->addConfigure('gd', '--with-jpeg --with-freetype');
-                    break;
-                case 'dba':
-                    $this->addPackage('enchant2-dev');
-                    break;
-                case 'gmp':
-                    $this->addPackage('gmp-dev');
-                    // no break
-                case 'gettext':
-                    $this->addPackage('gettext-dev');
-                    // no break
-                case 'ldap':
-                    $this->addPackage('ldb-dev');
-                    $this->addPackage('openldap-dev');
-                    $this->addPackage('libldap');
-                    break;
-                case 'imap':
-                    $this->addPackage('krb5-dev');
-                    $this->addPackage('imap-dev');
-                    $phpContext->addConfigure('imap', '--with-kerberos --with-imap-ssl');
-                    break;
-                case 'odbc':
-                    $this->addPackage('unixodbc-dev');
-                    $phpContext->addConfigure('odbc', '--with-unixODBC=shared,/usr');
-                    break;
-                case 'pdo_odbc':
-                    $this->addPackage('unixodbc-dev');
-                    $phpContext->addConfigure('pdo_odbc', '--with-pdo-odbc=unixODBC,/usr');
-                    break;
-                case 'pdo_dblib':
-                    $this->addPackage('freetds-dev');
-                    break;
-                case 'pspell':
-                    $this->addPackage('aspell-dev');
-                    break;
-                case 'simplexml':
-                    $this->addPackage('libxml2-dev');
-                    break;
-                case 'snmp':
-                    $this->addPackage('net-snmp-dev');
-                    break;
-                case 'tidy':
-                    $this->addPackage('tidyhtml-dev');
-                    break;
-                case 'xsl':
-                    $this->addPackage('libxslt-dev');
-                    break;
-                case 'curl':
-                    $this->addPackage('curl-dev');
-                    break;
-                case 'phar':
-                    $this->addPackage('openssl-dev');
-                    break;
-                case 'intl':
-                    $this->addPackage('icu-dev');
-                    break;
-                case 'zip':
-                    $this->addPackage('libzip-dev');
-                    break;
-                case 'iconv':
-                    $this->addPackage('gnu-libiconv-dev');
-                    break;
-                case 'mbstring':
-                    $this->addPackage('oniguruma-dev');
-                    break;
+        foreach ($phpContext->getExtensions() as $extension) {
+            foreach ($this->phpExtenssionDependencies[$extension] ?? [] as $package) {
+                $this->addPackage($package);
             }
         }
 

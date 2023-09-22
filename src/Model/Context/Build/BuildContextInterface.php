@@ -17,4 +17,9 @@ interface BuildContextInterface
      * Get docker file.
      */
     public function getDockerFile(): ?DockerFile;
+
+    /**
+     * Get image.
+     */
+    public function getImage(): string;
 }

@@ -16,6 +16,7 @@ use App\Dockerizor\AppManager;
 use App\Model\Context\App\ComposerAppContext;
 use App\Model\Context\App\NodeAppContext;
 use App\Model\Context\ConsoleContext;
+use App\Model\Docker\DockerRun;
 use App\Model\Process\Process;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -69,11 +70,11 @@ class DockerizorSymfonyInstallCommand extends Command
         $workdir = $this->appManager->getWorkdir();
 
         if (!file_exists("{$workdir}/{$projectName}")) {
-            $process = new Process("composer create-project symfony/skeleton:{$version} {$workdir}/{$projectName}", $output);
+            $process = new Process(new DockerRun('composer', "composer create-project symfony/skeleton:{$version} {$workdir}/{$projectName}"), $output);
             $process->run();
 
             if ($webApp) {
-                $process = new Process('composer require webapp', $output, "{$workdir}/{$projectName}");
+                $process = new Process(new DockerRun('composer', 'composer require webapp'), $output, "{$workdir}/{$projectName}");
                 $process->run();
             }
         }

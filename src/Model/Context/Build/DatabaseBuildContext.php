@@ -11,11 +11,10 @@ namespace App\Model\Context\Build;
 
 use App\Model\Dsn;
 
-class DatabaseBuildContext extends AbstractBuildContext implements BuildContextInterface
+class DatabaseBuildContext extends BuildContext implements BuildContextInterface
 {
     protected string $name;
     protected Dsn $dsn;
-    protected string $image;
     protected ?string $secret = null;
     protected array $vars = [];
 
@@ -32,24 +31,6 @@ class DatabaseBuildContext extends AbstractBuildContext implements BuildContextI
     public function getName(): string
     {
         return $this->name;
-    }
-
-    /**
-     * Get image.
-     */
-    public function getImage(): string
-    {
-        return $this->image;
-    }
-
-    /**
-     * Set image.
-     */
-    public function setImage(string $image): self
-    {
-        $this->image = $image;
-
-        return $this;
     }
 
     /**

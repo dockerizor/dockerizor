@@ -9,6 +9,7 @@
 
 namespace App\Composer;
 
+use App\Model\Docker\DockerRun;
 use App\Model\Process\Process;
 
 /**
@@ -28,11 +29,29 @@ class Client
     }
 
     /**
+     * Run composer require.
+     */
+    public function require(string $package, bool $noInteraction = true, bool $ignorePlatformReqs = true): void
+    {
+        $command = "composer require {$package}";
+        if ($ignorePlatformReqs) {
+            $command .= ' --ignore-platform-reqs';
+        }
+        if ($noInteraction) {
+            $command .= ' -n';
+        }
+
+        $process = new Process(new DockerRun('composer', $command), null, $this->workdir);
+        $process->setShowOutput(true);
+        $process->run();
+    }
+
+    /**
      * Get platform requirements.
      */
     public function getPlatformReqs(): array
     {
-        $process = new Process('composer check-platform-reqs -f json', null, $this->workdir);
+        $process = new Process(new DockerRun('composer', 'composer check-platform-reqs -f json'), null, $this->workdir);
         $process->setShowOutput(false);
         $process->run();
 
@@ -86,7 +105,7 @@ class Client
      */
     public function getExtensionSuggetions(): array
     {
-        $process = new Process('composer suggests --all --list', null, $this->workdir);
+        $process = new Process(new DockerRun('composer', 'composer suggests --all --list'), null, $this->workdir);
         $process->setShowOutput(false);
         $process->run();
 

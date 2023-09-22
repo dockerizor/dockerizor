@@ -66,7 +66,7 @@ class Client
         $response = $this->request('containers/json');
         $containers = json_decode($response, true);
 
-        return $this->hydrateAll(Container::class, $containers);
+        return $this->hydrateAll(Container::class, $containers ?? []);
     }
 
     /**
@@ -120,7 +120,7 @@ class Client
         $response = $this->request('secrets');
         $secrets = json_decode($response, true);
 
-        return $this->hydrateAll(Secret::class, $secrets);
+        return $this->hydrateAll(Secret::class, $secrets ?? []);
     }
 
     /**
@@ -164,7 +164,7 @@ class Client
         $response = $this->request('volumes');
         $volumes = json_decode($response, true);
 
-        return $this->hydrateAll(ApiObject::class, $volumes['Volumes']);
+        return $this->hydrateAll(ApiObject::class, $volumes['Volumes'] ?? []);
     }
 
     /**

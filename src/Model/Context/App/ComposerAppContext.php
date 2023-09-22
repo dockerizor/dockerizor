@@ -14,7 +14,7 @@ use App\Model\Context\Framework\FrameworkInterface;
 use App\Model\Context\Framework\Symfony;
 use App\Model\Enum\Framework;
 
-class ComposerAppContext extends AbstractAppContext implements AppContextInterface
+class ComposerAppContext extends AppContext implements AppContextInterface
 {
     protected string $composerFile;
     protected array $composerFileData;

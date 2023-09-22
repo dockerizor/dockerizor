@@ -9,8 +9,21 @@
 
 namespace App\Model\Context\Build;
 
-class PhpBuildContext extends AbstractBuildContext implements BuildContextInterface
+class PhpBuildContext extends BuildContext implements BuildContextInterface
 {
+    public const PHPIZE_DEPS = [
+        'autoconf',
+        'dpkg-dev',
+        'dpkg',
+        'file',
+        'g++',
+        'gcc',
+        'libc-dev',
+        'make',
+        'pkgconf',
+        're2c',
+    ];
+
     public const AVAILABLE_EXTENSION = [
         'bcmath',
         'bz2',
@@ -114,7 +127,6 @@ class PhpBuildContext extends AbstractBuildContext implements BuildContextInterf
     ];
 
     protected string $version;
-    protected string $image;
     protected string $rootDir = '/var/www/html';
     protected array $extensions = [];
     protected array $configures = [];
@@ -151,24 +163,6 @@ class PhpBuildContext extends AbstractBuildContext implements BuildContextInterf
         list($major, $minor, $patch) = explode('.', $this->version);
 
         return "{$major}.{$minor}";
-    }
-
-    /**
-     * Get image.
-     */
-    public function getImage(): string
-    {
-        return $this->image;
-    }
-
-    /**
-     * Set image.
-     */
-    public function setImage(string $image): self
-    {
-        $this->image = $image;
-
-        return $this;
     }
 
     /**
@@ -230,6 +224,7 @@ class PhpBuildContext extends AbstractBuildContext implements BuildContextInterf
     {
         if (!\in_array($extension, $this->extensions, true)) {
             $this->extensions[] = $extension;
+            $this->configureExtension($extension);
         }
 
         return $this;
@@ -246,6 +241,27 @@ class PhpBuildContext extends AbstractBuildContext implements BuildContextInterf
         }
 
         return $this;
+    }
+
+    /**
+     * Configure extension.
+     */
+    public function configureExtension(string $extension): void
+    {
+        switch ($extension) {
+            case 'gd':
+                $this->addConfigure('gd', '--with-jpeg --with-freetype');
+                break;
+            case 'imap':
+                $this->addConfigure('imap', '--with-kerberos --with-imap-ssl');
+                break;
+            case 'odbc':
+                $this->addConfigure('odbc', '--with-unixODBC=shared,/usr');
+                break;
+            case 'pdo_odbc':
+                $this->addConfigure('pdo_odbc', '--with-pdo-odbc=unixODBC,/usr');
+                break;
+        }
     }
 
     /**

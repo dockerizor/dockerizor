@@ -29,7 +29,7 @@ class PhpDockerComposeBuilder extends DockerComposeBuilder
         $service->addLabel('dockerizor.enable', 'true')
             ->setBuild('docker/php')
             ->addVolume(new Volume('.', '/var/www/html'))
-            ->addVolume(new Volume('docker/php/php.ini', '/usr/local/etc/php/conf.d'))
+            ->addVolume(new Volume('./docker/php/custom.ini', '/usr/local/etc/php/conf.d/custom.ini'))
         ;
 
         // Set networks for proxy
@@ -38,7 +38,7 @@ class PhpDockerComposeBuilder extends DockerComposeBuilder
             $service->addNetwork((new Network($appBuildContext->getBackendNetwork()))->addAlias("{$appName}-php"));
         }
 
-        $appBuildContext->addFile(new File('docker/php/php.ini', ''));
+        $appBuildContext->addFile(new File('docker/php/custom.ini', ''));
 
         $databaseBuildContext = $appBuildContext->getBuildContext(DatabaseBuildContext::class);
         if (
@@ -50,6 +50,11 @@ class PhpDockerComposeBuilder extends DockerComposeBuilder
 
         // Process dockerFile
         $dockerFile = $context->getDockerFile();
+
+        // Configure user
+        $dockerFile->getOperatingSystem()->addPackage('shadow');
+        $dockerFile->addRun('usermod -u 1000 www-data')
+            ->addRun('groupmod -g 1000 www-data');
 
         // Add PHP runs
         foreach ($context->getConfigures() as $extension => $configure) {

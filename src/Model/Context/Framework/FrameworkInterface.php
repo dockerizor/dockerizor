@@ -28,22 +28,16 @@ interface FrameworkInterface
 
     /**
      * Set root directory.
-     *
-     * @return self
      */
     public function getNodeRunDevCommand(): ?string;
 
     /**
      * Set root directory.
-     *
-     * @return self
      */
     public function getNodeRunBuildCommand(): ?string;
 
     /**
      * Set root directory.
-     *
-     * @return self
      */
     public function getNodeRunInstallCommand(): ?string;
 }
