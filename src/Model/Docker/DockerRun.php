@@ -17,9 +17,11 @@ class DockerRun
     protected string $workdir;
     protected string $user;
     protected array $volumes = [];
+    protected array $networks = [];
+    protected array $options = [];
     protected bool $rm = true;
 
-    public function __construct(string $image, string $command, string $volume = null, string $workdir = '/app', string $user = '1000:1000')
+    public function __construct(string $image, string $command, string $volume = '.:/app', string $workdir = '/app', string $user = '1000:1000')
     {
         $this->image = $image;
         $this->command = $command;
@@ -38,6 +40,20 @@ class DockerRun
         return $this;
     }
 
+    public function addNetwork(string $network): self
+    {
+        $this->networks[] = $network;
+
+        return $this;
+    }
+
+    public function addOption(string $option): self
+    {
+        $this->options[] = $option;
+
+        return $this;
+    }
+
     public function __toString()
     {
         $volumes = '';
@@ -47,6 +63,16 @@ class DockerRun
 
         $rm = $this->rm ? '--rm' : '';
 
-        return "docker run {$rm} {$volumes} -w {$this->workdir} -u {$this->user} {$this->image} {$this->command}";
+        $networks = '';
+        foreach ($this->networks as $network) {
+            $networks .= "--network {$network} ";
+        }
+
+        $options = '';
+        foreach ($this->options as $option) {
+            $options .= "{$option} ";
+        }
+
+        return "docker run {$rm} {$volumes} -w {$this->workdir} -u {$this->user} {$networks} {$options} {$this->image} {$this->command}";
     }
 }
