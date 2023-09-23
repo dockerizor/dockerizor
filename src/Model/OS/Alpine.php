@@ -42,6 +42,10 @@ class Alpine extends OperatingSystem
         'iconv' => ['gnu-libiconv-dev'],
         'mbstring' => ['oniguruma-dev'],
         'sockets' => ['linux-headers'],
+        'soap' => ['libxml2-dev'],
+        'imap' => ['openssl-dev', 'imap-dev'],
+        'enchant' => ['enchant2-dev'],
+        'bz2' => ['bzip2-dev'],
     ];
 
     /**

@@ -9,10 +9,11 @@
 
 namespace App\Builder\DockerFile;
 
-use App\Model\Docker\DockerFile;
-use App\Model\Context\Build\BuildContextInterface;
-use App\Model\Context\Build\AppBuildContext;
 use App\Builder\DockerFile\Service\PhpDockerFileBuilder;
+use App\Model\Context\Build\AppBuildContext;
+use App\Model\Context\Build\BuildContextInterface;
+use App\Model\Context\Build\PhpBuildContext;
+use App\Model\Docker\DockerFile;
 
 class DockerFileBuilder
 {
@@ -22,8 +23,7 @@ class DockerFileBuilder
     public function __construct(
         PhpDockerFileBuilder $phpDockerFileBuilder,
         AlpineDockerFileBuilder $alpineDockerFileBuilder
-    )
-    {
+    ) {
         $this->serviceBuilders = [
             'php' => $phpDockerFileBuilder,
         ];
@@ -40,13 +40,19 @@ class DockerFileBuilder
     {
         $os = $context->getDockerFile()->getOperatingSystem();
 
-        switch($context::class) {
+        switch ($context::class) {
             case PhpBuildContext::class:
-                $this->serviceBuilders['php'] = new PhpDockerFileBuilder();
+                $this->serviceBuilders['php']->prepare($appBuildContext, $context);
                 break;
         }
 
         $dockerFile = $this->osBuilders[$os->getName()]->build($context);
+
+        switch ($context::class) {
+            case PhpBuildContext::class:
+                $this->serviceBuilders['php']->build($appBuildContext, $context);
+                break;
+        }
 
         // Set path aand add file to app build context
         $dockerFile->setPath("docker/{$os->getImageName()}/Dockerfile");

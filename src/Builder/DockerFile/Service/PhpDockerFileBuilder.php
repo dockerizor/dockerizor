@@ -1,12 +1,27 @@
 <?php
 
+/*
+ * This file is part of the Dockerisor package.
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace App\Builder\DockerFile\Service;
 
-use App\Model\Context\Build\PhpBuildContext;
 use App\Model\Context\Build\AppBuildContext;
+use App\Model\Context\Build\PhpBuildContext;
 
 class PhpDockerFileBuilder
 {
+    public function prepare(AppBuildContext $appBuildContext, PhpBuildContext $context)
+    {
+        // Process dockerFile
+        $dockerFile = $context->getDockerFile();
+
+        $dockerFile->getOperatingSystem()->addPackage('shadow');
+    }
+
     /**
      * Build php service.
      */
@@ -16,7 +31,6 @@ class PhpDockerFileBuilder
         $dockerFile = $context->getDockerFile();
 
         // Configure user
-        $dockerFile->getOperatingSystem()->addPackage('shadow');
         $dockerFile->addRun('usermod -u 1000 www-data')
             ->addRun('groupmod -g 1000 www-data');
 

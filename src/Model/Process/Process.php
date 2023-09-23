@@ -55,7 +55,7 @@ class Process
                         }
                     }
                     if ($this->saveOutput && $this->saveOutErr) {
-                        $this->outputLines[] = $buffer;
+                        $this->outputLines = array_merge($this->outputLines, explode("\n", $buffer));
                     }
                     break;
                 case BaseProcess::OUT:
@@ -67,7 +67,7 @@ class Process
                         }
                     }
                     if ($this->saveOutput && $this->saveOutOut) {
-                        $this->outputLines[] = $buffer;
+                        $this->outputLines = array_merge($this->outputLines, explode("\n", $buffer));
                     }
                     break;
             }

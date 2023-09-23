@@ -24,8 +24,10 @@ class AlpineDockerFileBuilder
         $operatingSystem = $dockerFile->getOperatingSystem();
 
         // Add operating system runs
-        $dockerFile->addRun($operatingSystem->runPackageManagerUpdate());
-        $dockerFile->addRun($operatingSystem->runPackageManagerInstall());
+        if (!empty($operatingSystem->getPackages())) {
+            $dockerFile->addRun($operatingSystem->runPackageManagerUpdate());
+            $dockerFile->addRun($operatingSystem->runPackageManagerInstall());
+        }
 
         return $dockerFile;
     }
