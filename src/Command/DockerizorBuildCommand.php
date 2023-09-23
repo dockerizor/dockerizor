@@ -10,7 +10,7 @@
 namespace App\Command;
 
 use App\Builder\AppBuilder;
-use App\Builder\DockerFile\OS\DockerFileBuilder;
+use App\Builder\DockerFile\DockerFileBuilder;
 use App\Model\Context\Build\AppBuildContext;
 use App\Model\Context\Build\BuildContext;
 use App\Model\Context\ConsoleContext;

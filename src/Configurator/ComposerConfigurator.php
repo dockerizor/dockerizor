@@ -13,7 +13,7 @@ use App\Builder\AppBuilder;
 use App\Builder\DockerCompose\DatabaseDockerComposeBuilder;
 use App\Builder\DockerCompose\PhpDockerComposeBuilder;
 use App\Builder\DockerCompose\WebDockerComposeBuilder;
-use App\Builder\DockerFile\OS\DockerFileBuilder;
+use App\Builder\DockerFile\DockerFileBuilder;
 use App\Composer\Client as ComposerClient;
 use App\Docker\Client;
 use App\Dockerizor\AppManager;
