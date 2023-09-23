@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-namespace App\Builder\DockerFile;
+namespace App\Builder\DockerFile\OS;
 
 use App\Model\Context\Build\AppBuildContext;
 use App\Model\Context\Build\BuildContextInterface;
