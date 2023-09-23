@@ -9,6 +9,9 @@
 
 namespace App\Model\Context\Build;
 
+use App\Model\Docker\DockerRun;
+use App\Model\Process\Process;
+
 class PhpBuildContext extends BuildContext implements BuildContextInterface
 {
     public const PHPIZE_DEPS = [
@@ -23,113 +26,13 @@ class PhpBuildContext extends BuildContext implements BuildContextInterface
         'pkgconf',
         're2c',
     ];
-
-    public const AVAILABLE_EXTENSION = [
-        'bcmath',
-        'bz2',
-        'calendar',
-        'ctype',
-        'curl',
-        'dba',
-        'dom',
-        'enchant',
-        'exif',
-        'fileinfo',
-        'filter',
-        'ftp',
-        'gd',
-        'gettext',
-        'gmp',
-        'hash',
-        'iconv',
-        'imap',
-        'interbase',
-        'intl',
-        'json',
-        'ldap',
-        'mbstring',
-        'mcrypt',
-        'mysqli',
-        'oci8',
-        'odbc',
-        'opcache',
-        'pcntl',
-        'pdo',
-        'pdo_dblib',
-        'pdo_firebird',
-        'pdo_mysql',
-        'pdo_oci',
-        'pdo_odbc',
-        'pdo_pgsql',
-        'pdo_sqlite',
-        'pgsql',
-        'phar',
-        'posix',
-        'pspell',
-        'readline',
-        'recode',
-        'reflection',
-        'session',
-        'shmop',
-        'simplexml',
-        'snmp',
-        'soap',
-        'sockets',
-        'spl',
-        'standard',
-        'sysvmsg',
-        'sysvsem',
-        'sysvshm',
-        'tidy',
-        'tokenizer',
-        'wddx',
-        'xml',
-        'xmlreader',
-        'xmlrpc',
-        'xmlwriter',
-        'xsl',
-        'zip',
-    ];
-
-    public const DEFAULT_EXTENSION = [
-        'ctype',
-        'curl',
-        'date',
-        'dom',
-        'fileinfo',
-        'filter',
-        'ftp',
-        'hash',
-        'iconv',
-        'json',
-        'libxml',
-        'mbstring',
-        'mysqlnd',
-        'openssl',
-        'pcre',
-        'pdo',
-        'pdo_sqlite',
-        'phar',
-        'posix',
-        'readline',
-        'reflection',
-        'session',
-        'simplexml',
-        'sodium',
-        'spl',
-        'sqlite3',
-        'standard',
-        'tokenizer',
-        'xml',
-        'xmlreader',
-        'xmlwriter',
-        'zlib',
-    ];
-
     protected string $version;
     protected string $rootDir = '/var/www/html';
     protected array $extensions = [];
     protected array $configures = [];
+
+    protected ?array $defaultExtensions = null;
+    protected ?array $availableExtensions = null;
 
     public function __construct(string $version = '7.4', string $image = 'php:7.4-fpm')
     {
@@ -195,8 +98,8 @@ class PhpBuildContext extends BuildContext implements BuildContextInterface
         $extensions = [];
         foreach ($this->extensions as $extension) {
             if (
-                \in_array($extension, self::AVAILABLE_EXTENSION, true)
-                && !\in_array($extension, self::DEFAULT_EXTENSION, true)
+                \in_array($extension, $this->getDefaultExtensions(), true)
+                && !\in_array($extension, $this->getDefaultExtensions(), true)
             ) {
                 $extensions[] = $extension;
             }
@@ -261,6 +164,12 @@ class PhpBuildContext extends BuildContext implements BuildContextInterface
             case 'pdo_odbc':
                 $this->addConfigure('pdo_odbc', '--with-pdo-odbc=unixODBC,/usr');
                 break;
+            case 'oci8':
+                $this->addConfigure('oci8', '--with-oci8=instantclient,/usr/local/instantclient');
+                break;
+            case 'pdo_oci':
+                $this->addConfigure('pdo_oci', '--with-php-config=/usr/bin/php-config8');
+                break;
         }
     }
 
@@ -320,5 +229,38 @@ class PhpBuildContext extends BuildContext implements BuildContextInterface
                 $this->addExtension('sqlsrv');
                 break;
         }
+    }
+
+    /**
+     * Get default extensions from docker image.
+     */
+    public function getDefaultExtensions(): array
+    {
+        if (null !== $this->defaultExtensions) {
+            return $this->defaultExtensions;
+        }
+
+        $process = new Process(new DockerRun($this->getDockerFile()->getOperatingSystem()->getImage(), 'php -m'));
+        $process->setShowOutput(false)->run();
+
+        $outputLines = $process->getOutputLines();
+        $outputLines = array_diff($outputLines, ['', '[PHP Modules]', '[Zend Modules]', 'Core']);
+
+        return $this->defaultExtensions = array_map('strtolower', $outputLines);
+    }
+
+    /**
+     * Get available extensions from docker image.
+     */
+    public function getAvailableExtensions(): array
+    {
+        if (null !== $this->availableExtensions) {
+            return $this->availableExtensions;
+        }
+
+        $process = new Process(new DockerRun($this->getDockerFile()->getOperatingSystem()->getImage(), 'sh -c "docker-php-source extract && ls -A /usr/src/php/ext/"', '.:/app', '/app', 'root:root'));
+        $process->setSaveOutErr(true)->setShowOutput(false)->run();
+
+        return $this->availableExtensions = array_filter($process->getOutputLines());
     }
 }
